@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arc III — Fearth 10.000 Tahun Kemudian | The Secret of Crystal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet" />
+  <style>
+    :root{--void:#04050d;--deep:#080610;--card:#0f0c18;--border:#1a1530;--crystal:#a78bfa;--crystal2:#7c3aed;--crystal3:#4c1d95;--gold:#f5c842;--gold2:#d4a017;--ember:#ff6b35;--text:#e8e0f8;--muted:#6b5d94;--soft:rgba(232,224,248,.75);}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{background:var(--void);color:var(--text);font-family:'EB Garamond',Georgia,serif;min-height:100vh;overflow-x:hidden;cursor:none;}
+    #cur-dot{width:6px;height:6px;background:var(--crystal);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9999;box-shadow:0 0 10px var(--crystal),0 0 22px var(--crystal2);}
+    #cur-ring{width:26px;height:26px;border:1px solid var(--crystal2);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9998;opacity:.45;}
+    #starfield{position:fixed;inset:0;z-index:0;pointer-events:none;}
+    .ambient{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 55% 50% at 50% 30%,rgba(124,58,237,.12) 0%,transparent 70%),radial-gradient(ellipse 35% 40% at 85% 75%,rgba(167,139,250,.07) 0%,transparent 65%);}
+    nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:60px;background:rgba(4,3,8,.88);backdrop-filter:blur(18px);border-bottom:1px solid rgba(124,58,237,.14);}
+    .nav-left{display:flex;align-items:center;gap:16px;}
+    .nav-back{font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.15em;color:var(--muted);text-decoration:none;text-transform:uppercase;display:flex;align-items:center;gap:6px;transition:color .2s;}
+    .nav-back:hover{color:var(--crystal);}
+    .nav-sep{width:1px;height:18px;background:var(--border);}
+    .nav-arc{font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.18em;color:var(--crystal);text-transform:uppercase;}
+    .nav-progress{display:flex;align-items:center;gap:8px;}
+    .prog-dot{width:8px;height:8px;border-radius:50%;border:1px solid var(--border);transition:all .3s;position:relative;}
+    .prog-dot a{display:block;width:100%;height:100%;border-radius:50%;}
+    .prog-dot.active{background:var(--crystal);border-color:var(--crystal);box-shadow:0 0 8px var(--crystal);}
+    .prog-dot.done{background:var(--gold2);border-color:var(--gold);}
+    .page{position:relative;z-index:2;max-width:780px;margin:0 auto;padding:110px 24px 120px;}
+    .chapter-header{text-align:center;margin-bottom:64px;opacity:0;animation:rise .9s .1s ease forwards;}
+    .ch-arc{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.35em;color:var(--gold);text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:18px;}
+    .ch-line{width:50px;height:1px;}
+    .ch-line.l{background:linear-gradient(90deg,transparent,var(--gold));}
+    .ch-line.r{background:linear-gradient(90deg,var(--gold),transparent);}
+    .chapter-num{font-family:'Cinzel Decorative',serif;font-size:clamp(2.5rem,6vw,4.5rem);font-weight:900;background:linear-gradient(135deg,#fff 0%,var(--crystal) 45%,var(--gold) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;margin-bottom:16px;filter:drop-shadow(0 0 30px rgba(167,139,250,.5));}
+    .chapter-title{font-family:'Cinzel Decorative',serif;font-size:clamp(1rem,3vw,1.5rem);color:#fff;letter-spacing:.06em;margin-bottom:10px;}
+    .chapter-subtitle{font-family:'Cinzel',serif;font-size:.75rem;letter-spacing:.2em;color:var(--crystal);text-transform:uppercase;margin-bottom:24px;}
+    .ch-divider{width:200px;height:1px;margin:0 auto;background:linear-gradient(90deg,transparent,var(--crystal),var(--crystal2),var(--crystal),transparent);}
+    .story{opacity:0;animation:rise .9s .4s ease forwards;}
+    .opening-quote{border-left:2px solid var(--crystal2);padding:20px 0 20px 28px;margin-bottom:48px;position:relative;}
+    .opening-quote::before{content:'"';position:absolute;left:-2px;top:-10px;font-family:'Cinzel Decorative',serif;font-size:3rem;color:rgba(167,139,250,.2);line-height:1;}
+    .opening-quote p{font-size:clamp(1rem,2.5vw,1.2rem);font-style:italic;color:rgba(232,224,248,.85);line-height:1.9;}
+    .opening-quote cite{display:block;margin-top:12px;font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.2em;color:var(--crystal);text-transform:uppercase;}
+    .prose p{font-size:clamp(1rem,2vw,1.15rem);line-height:1.95;color:var(--soft);margin-bottom:28px;text-align:justify;hyphens:auto;}
+    .prose p:first-child::first-letter{font-family:'Cinzel Decorative',serif;font-size:3.8rem;font-weight:900;float:left;line-height:.8;margin:4px 12px 0 0;color:var(--crystal);text-shadow:0 0 20px rgba(167,139,250,.6);}
+    .prose em{color:var(--gold);font-style:italic;}
+    .prose strong{color:#fff;font-weight:600;}
+    .story-break{display:flex;align-items:center;justify-content:center;gap:12px;margin:48px 0;font-size:.75rem;color:var(--muted);}
+    .story-break::before,.story-break::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);}
+    .lore-box{border-radius:4px;padding:20px 24px;margin:32px 0;}
+    .lore-box.crystal{background:rgba(124,58,237,.06);border:1px solid rgba(167,139,250,.18);border-left:3px solid var(--crystal);}
+    .lore-box.dark{background:rgba(0,0,0,.35);border:1px solid rgba(76,29,149,.3);border-left:3px solid var(--crystal3);}
+    .lore-box.gold{background:rgba(245,200,66,.04);border:1px solid rgba(245,200,66,.16);border-left:3px solid var(--gold2);}
+    .lore-box .lore-label{font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;margin-bottom:10px;}
+    .lore-box.crystal .lore-label{color:var(--crystal);}
+    .lore-box.dark .lore-label{color:var(--muted);}
+    .lore-box.gold .lore-label{color:var(--gold);}
+    .lore-box p{font-size:.95rem;font-style:italic;color:rgba(232,224,248,.65);line-height:1.8;margin:0;}
+    .leaf-deco{text-align:center;font-size:1.6rem;margin:36px 0;opacity:.35;letter-spacing:12px;filter:drop-shadow(0 0 8px rgba(167,139,250,.4));}
+    .think-box{margin:28px 0;padding:22px 28px;background:rgba(76,29,149,.07);border:1px solid rgba(124,58,237,.14);border-radius:5px;}
+    .think-label{font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin-bottom:10px;}
+    .think-box p{font-size:.94rem;font-style:italic;color:rgba(232,224,248,.6);line-height:1.75;margin:0;}
+    .dialogue{margin:28px 0;}
+    .dialogue-line{display:flex;flex-direction:column;gap:4px;margin-bottom:16px;padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:4px;}
+    .dialogue-line.rez{border-left:3px solid var(--crystal);}
+    .dialogue-line.ibu{border-left:3px solid var(--gold2);}
+    .dialogue-line.kakak{border-left:3px solid var(--ember);}
+    .dialogue-speaker{font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;margin-bottom:5px;}
+    .dialogue-line.rez .dialogue-speaker{color:var(--crystal);}
+    .dialogue-line.ibu .dialogue-speaker{color:var(--gold2);}
+    .dialogue-line.kakak .dialogue-speaker{color:var(--ember);}
+    .dialogue-text{font-size:1rem;font-style:italic;color:rgba(232,224,248,.82);line-height:1.7;}
+    .char-intro{background:var(--card);border:1px solid var(--border);border-radius:5px;padding:22px;display:flex;gap:18px;align-items:flex-start;margin:28px 0;}
+    @media(max-width:500px){.char-intro{flex-direction:column;}}
+    .char-icon-big{font-size:2.8rem;line-height:1;flex-shrink:0;}
+    .char-intro-name{font-family:'Cinzel Decorative',serif;font-size:.95rem;color:var(--gold);margin-bottom:4px;}
+    .char-intro-role{font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:.14em;color:var(--crystal);text-transform:uppercase;margin-bottom:10px;}
+    .char-intro-desc{font-size:.9rem;font-style:italic;color:var(--muted);line-height:1.7;}
+    .nav-footer{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(4,3,8,.94);backdrop-filter:blur(16px);border-top:1px solid rgba(124,58,237,.12);display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:64px;}
+    .nav-btn{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--border);padding:9px 22px;border-radius:3px;display:flex;align-items:center;gap:8px;transition:all .25s;}
+    .nav-btn:hover{color:var(--crystal);border-color:var(--crystal);background:rgba(167,139,250,.05);}
+    .nav-btn.primary{color:var(--gold);border-color:var(--gold2);}
+    .nav-btn.primary:hover{background:rgba(245,200,66,.07);border-color:var(--gold);}
+    .nav-btn.disabled{opacity:.3;pointer-events:none;}
+    .nav-page-info{font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;}
+    .nav-page-info span{color:var(--crystal);}
+    @keyframes rise{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  </style>
+</head>
+<body>
+  <div id="cur-dot"></div><div id="cur-ring"></div>
+  <canvas id="starfield"></canvas>
+  <div class="ambient"></div>
+  <nav>
+    <div class="nav-left">
+      <a href="../story-hub.html" class="nav-back"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Story Hub</a>
+      <div class="nav-sep"></div>
+      <span class="nav-arc">Arc III · Dark Zen</span>
+    </div>
+    <div class="nav-progress">
+      <div class="prog-dot active"></div>
+      <div class="prog-dot"><a href="arc3-p2.html"></a></div>
+      <div class="prog-dot"><a href="arc3-p3.html"></a></div>
+      <div class="prog-dot"><a href="arc3-p4.html"></a></div>
+      <div class="prog-dot"><a href="arc3-p5.html"></a></div>
+    </div>
+  </nav>
+
+  <main class="page">
+    <header class="chapter-header">
+      <div class="ch-arc"><span class="ch-line l"></span>Arc III · Dark Zen<span class="ch-line r"></span></div>
+      <div class="chapter-num">Bagian I</div>
+      <h1 class="chapter-title">Fearth 10.000 Tahun Kemudian</h1>
+      <div class="chapter-subtitle">Tirani · Patung Ibza · Kristal yang Memanggil</div>
+      <div class="ch-divider"></div>
+    </header>
+
+    <article class="story">
+
+      <div class="opening-quote">
+        <p>Di Fearth — versi lain dari Bumi yang kita tinggali sekarang — seorang Raja telah hidup selama beribu-ribu tahun. Kekuatannya yang tak terhingga membuatnya abadi, dan sistemnya yang kejam telah tersusun rapi di tangannya selama lebih dari sepuluh ribu tahun.</p>
+        <cite>— Arc III · Dark Zen</cite>
+      </div>
+
+      <div class="prose">
+        <p>
+          Sepuluh ribu tahun lebih telah berlalu sejak Ibza berdiri di garis paling depan melawan X — namun di planet Fearth, nama itu kini menjadi sesuatu yang berbeda. Bukan pahlawan. Bukan legenda yang dikenang dengan kagum. Melainkan <em>nama yang ditakuti</em>, nama yang ditulis sebagai penghianat dalam sebuah kitab yang wajib dihafalkan oleh setiap jiwa di planet ini.
+        </p>
+        <p>
+          Fearth kini dipimpin oleh satu kekuasaan tunggal — seorang raja yang bertakhta di istana agung yang berdiri di tengah benua besar hasil penyatuan tiga benua yang dahulu terpisah. Rantai emas berukuran raksasa tampak melilit setiap batas benua yang kini menyatu itu — simbol bahwa <strong>tidak ada tempat yang bebas dari genggamannya.</strong>
+        </p>
+      </div>
+
+      <div class="lore-box dark">
+        <div class="lore-label">📜 Sistem Tirani Raja X</div>
+        <p>Sebuah sistem di mana para penjahat diampuni dan dibiarkan berkeliaran bebas asal tak membuat kekacauan besar. Tidak ada hal yang benar-benar dilarang dalam sistem ini — kecuali satu: menantang perintah Sang Raja. Siapa pun yang berani mengubah satu huruf dalam kitab resminya akan diperlihatkan penyiksaan paling menyakitkan yang pernah ada. Seberapa banyak pun orang yang melawannya, tidak ada yang pernah selamat. Kekuatannya yang absolut tidak bisa dikalahkan oleh apapun.</p>
+      </div>
+
+      <div class="prose">
+        <p>
+          Kitab itu sendiri menceritakan sebuah kisah — kisah yang, menurut sang Raja, adalah kebenaran absolut. Ibza digambarkan sebagai pencipta dan pelaksana sistem hancur di masanya, seorang pengkhianat yang layak dijadikan <em>patung hias di depan gerbang masuk istana</em>. Setiap orang di Fearth tahu ceritanya. Setiap anak kecil pernah mendongak ke arah patung itu dan mendapat penjelasan yang sama.
+        </p>
+      </div>
+
+      <div class="lore-box crystal">
+        <div class="lore-label">💎 Patung Ibza</div>
+        <p>Setiap helaian tentakel yang terukir dari bawah kaki sang patung, melingkari kaki dan tubuhnya — seakan-akan ia ditahan oleh akar pohon yang melarangnya mengambil sesuatu yang bersinar dan bercahaya terang di ujung tangannya yang terentang ke langit. Wajah patung itu sangat detail: penuh harap, penuh rasa sakit yang menyiksa — wajah yang menggambarkan seseorang yang gagal mencapai keinginannya. Dan di ujung tangannya yang terentang — sebuah cahaya terang bersinar. Pure Crystal yang masih tersegel.</p>
+      </div>
+
+      <div class="story-break">✦ ✦ ✦</div>
+      <div class="leaf-deco">🍃 ✦ 🍃</div>
+
+      <div class="prose">
+        <p>
+          Sebuah angin berhembus pelan, mengayunkan ranting-ranting pohon hingga sebuah daun terbang melayang dengan pelan dan halus. Melayang dibawa angin lembut bagaikan harapan setiap manusia yang ingin terbebas dari kekangan kejam ini. Sang daun melewati banyak sekali tempat — menyusuri setiap kekejaman dan kedamaian sekaligus. Terjatuh di atas genangan air yang jernih, menunjukkan sebuah tempat yang bersih, aman, damai, dan makmur — daerah yang sangat dekat dengan istana agung tersebut berdiri.
+        </p>
+        <p>
+          Di tempat itulah seorang anak berlarian dengan senang dan bahagia, mengejar seekor serangga yang terbang melewati patung di depan gerbang. Sang anak mendongak ke atas dengan penasaran — dan melihat cahaya terang bersinar dari ujung tangan patung itu.
+        </p>
+      </div>
+
+      <div class="char-intro">
+        <div class="char-icon-big">👦</div>
+        <div>
+          <div class="char-intro-name">Rez</div>
+          <div class="char-intro-role">9 Tahun · Anak Jendral Tinggi Ke-4 · Istana Fearth</div>
+          <div class="char-intro-desc">Anak laki-laki dengan rambut hitam berponi bergaris merah tipis dan mata berwarna coklat yang kadang terlihat oranye di bawah sinar matahari. Selalu membuat keluarganya kerepotan mencarinya — dan hari ini, ia memanjat sesuatu yang seharusnya tidak boleh disentuh siapapun.</div>
+        </div>
+      </div>
+
+      <div class="prose">
+        <p>
+          Terlihat penasaran, Rez memanjat patung tersebut saat para penjaga lengah dan sedang bersantai. Ia memanjat dengan penuh harap — berharap sesuatu yang indah ada di atas sana. Saat sudah mencapai tangan kanan sang patung yang mengarah ke langit, ia berdiri di atas telapak tangan batu itu, seolah ikut hendak mengambil cahaya terang di ujungnya.
+        </p>
+      </div>
+
+      <div class="think-box">
+        <div class="think-label">💭 Pikiran Rez</div>
+        <p>"Apakah sesuatu pernah terjadi di sini? Apakah cahaya itu benar-benar bisa digapai? Apakah bisa dipegang atau digunakan seperti yang ada di dalam kitab? Dan mengapa patung ini seperti berusaha menggapainya — dengan wajah yang sangat detail, penuh harap, sekaligus penuh rasa sakit yang menyiksa? Wajah itu seperti menggambarkan bagaimana jika seseorang gagal mencapai keinginannya."</p>
+      </div>
+
+      <div class="story-break">✦ ✦ ✦</div>
+
+      <div class="prose">
+        <p>
+          Seutas cahaya lembut muncul dari cahaya terang di ujung patung itu, lalu merasuki Rez. Matanya bercahaya. Sebuah suara berkumandang — memanggil namanya dengan lembut dan halus, meminta dilepaskan. Sehelai demi sehelai cahaya lembut terus menjerat tubuhnya dengan halus dan penuh harap, <em>bagaikan seorang ibu yang memeluk anaknya dengan erat</em>, memanggil-manggil namanya lembut seperti seorang ibu yang membangunkan anaknya. Namun cahaya-cahaya itu seolah ingin memberitahunya sesuatu yang penting.
+        </p>
+        <p>
+          Pada saat yang bersamaan, salah seorang penjaga yang berjaga di dekat patung melihat seutas cahaya lembut melewatinya di siang hari yang tenang — dan melihat seorang anak kecil di atas patung berharga yang selalu disebut-sebut dalam kitab. Seolah ada penghalang jalan bagaikan kain yang menahannya memasuki area si anak. Namun dengan rasa penasaran yang tinggi dan niat menyelamatkan anak itu, ia rela memanjat patung tersebut dan mengangkat Rez yang sedari tadi terdiam dengan mulut terbuka terperangah — matanya masih bersinar, cahaya lembut masih mengalir masuk ke kepalanya.
+        </p>
+        <p>
+          Setelah diturunkan, Rez terlihat kebingungan — namun sang penjaga menyadari ada <strong>tekad besar dan keinginan luar biasa</strong> di dalam mata anak itu yang kebingungan mencerna apa yang baru saja ia rasakan.
+        </p>
+      </div>
+
+      <div class="story-break">✦ ✦ ✦</div>
+
+      <div class="prose">
+        <p>
+          Seorang perempuan berpakaian mewah namun agak sedikit kotor berlari mendekati Rez sambil membawakan topinya yang sudah kotor tak karuan. Ia adalah kakak kandung Rez — ia berlari, memarahi adiknya, lalu memeluknya erat, lalu memakaikan topi kotor itu ke kepala Rez.
+        </p>
+      </div>
+
+      <div class="dialogue">
+        <div class="dialogue-line kakak">
+          <div class="dialogue-speaker">Alicia — Kakak Rez</div>
+          <div class="dialogue-text">"Rez, ayo pulang, ibu sudah memanggil kita."</div>
+        </div>
+      </div>
+
+      <div class="prose">
+        <p>
+          Mereka adalah anggota kerajaan. Sang ayah adalah salah satu dari <em>5 Jendral Tinggi yang dipilih langsung oleh Raja X</em>, sedangkan sang ibu adalah sekretaris kerajaan yang dipercaya oleh raja yang agung. Memasuki istana, mereka berdua disambut oleh ibunya yang sudah mengkhawatirkan anaknya yang menghilang berjam-jam ketika bermain bersama temannya.
+        </p>
+      </div>
+
+      <div class="dialogue">
+        <div class="dialogue-line rez">
+          <div class="dialogue-speaker">Rez</div>
+          <div class="dialogue-text">"Bu, kenapa patung di depan gerbang istana itu terlihat seperti sedang menahan rasa sakit?"</div>
+        </div>
+        <div class="dialogue-line ibu">
+          <div class="dialogue-speaker">Ibu — Fath</div>
+          <div class="dialogue-text">"Itu karena di dalam alkitab, dia mengalami kekalahan setelah berkhianat pada sang Raja."</div>
+        </div>
+      </div>
+
+      <div class="prose">
+        <p>
+          Sang ibu menjawab singkat — lalu menyuruh Rez untuk segera membersihkan tubuhnya. Beberapa pelayan pun datang, membawanya ke tempat untuk membersihkan diri yang kotor akibat bermain dengan teman-temannya. Dalam perjalanan menuju kamar mandi, Rez tak bisa berhenti bertanya.
+        </p>
+      </div>
+
+      <div class="dialogue">
+        <div class="dialogue-line rez">
+          <div class="dialogue-speaker">Rez — kepada para pelayan</div>
+          <div class="dialogue-text">"Kak, kenapa patung itu seperti memanggilku? Kenapa cahaya itu memiliki wujudnya?"</div>
+        </div>
+      </div>
+
+      <div class="prose">
+        <p>
+          Salah seorang dari tiga pelayan yang berjalan bersamanya menjawab dengan senyum: <em>"Nanti kalau sudah bersih, kakak bawa kamu kepada seseorang yang bisa menjawabnya ya?"</em>
+        </p>
+        <p>
+          Mendengar itu, Rez menjadi senang dan tak sabar. Karena ia masih sangat penasaran dengan perkataan-perkataan dari <strong>sang kristal bercahaya itu</strong>.
+        </p>
+      </div>
+
+      <div class="lore-box gold">
+        <div class="lore-label">✦ Catatan Penting</div>
+        <p>Pelayan yang menjawab pertanyaan Rez itu bernama Siri — kakak kandung dari seorang pria yang sudah lama diasingkan oleh Raja X ke benua terlarang. Siri tahu lebih banyak dari yang ia akui. Dan ia tahu: pertemuan antara Rez dan kristal itu bukanlah kebetulan.</p>
+      </div>
+
+      <div class="story-break">✦ ✦ ✦</div>
+
+      <div class="prose">
+        <p>
+          Air mengalir dalam ruang itu, membasahi rambut Rez yang kini membuatnya terlihat lebih bersih dan tampan dari sebelumnya. Segera setelah membersihkan tubuhnya, ia meminta izin kepada ayah dan ibunya untuk pergi sebentar bersama salah seorang pelayan. Sang ibu tersenyum dan memberi izin. Sang ayah sedikit kebingungan, namun akhirnya mengizinkan juga — dan mengutus beberapa prajurit untuk menjaga anaknya dalam perjalanan.
+        </p>
+        <p>
+          Pesawat canggih milik anggota kerajaan meluncur bagai ikan tuna, tanpa suara namun dengan kecepatan yang melebihi kecepatan suara — melewati sebuah pegunungan, danau raksasa, bahkan menyusuri sungai terpanjang. Di dalam pesawat, Rez yang antusias melihat pemandangan yang indah sekaligus mengerikan, bertanya-tanya dalam hatinya: <em>ke mana mereka akan pergi? Dan siapakah orang yang bisa menjawab semua pertanyaannya tentang cahaya kristal itu?</em>
+        </p>
+      </div>
+
+    </article>
+  </main>
+
+  <div class="nav-footer">
+    <a href="../story-hub.html" class="nav-btn disabled"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Kembali</a>
+    <div class="nav-page-info">Halaman <span>1</span> / 5</div>
+    <a href="arc3-p2.html" class="nav-btn primary">Lanjut<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+  </div>
+
+  <script>
+    const dot=document.getElementById('cur-dot'),ring=document.getElementById('cur-ring');
+    let mx=0,my=0,rx=0,ry=0;
+    document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;dot.style.left=mx-3+'px';dot.style.top=my-3+'px';});
+    (function loop(){rx+=(mx-rx-13)*.1;ry+=(my-ry-13)*.1;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(loop);})();
+    const cv=document.getElementById('starfield'),cx=cv.getContext('2d');
+    let W,H,stars=[];
+    function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight;}
+    function initS(){stars=Array.from({length:200},()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.2+.2,a:Math.random(),sp:Math.random()*.2+.03,tw:Math.random()*Math.PI*2,purple:Math.random()<.14,gold:Math.random()<.05}));}
+    function draw(){cx.clearRect(0,0,W,H);const t=Date.now()*.001;stars.forEach(s=>{const a=s.a*(.4+.6*Math.sin(t*s.sp+s.tw));cx.beginPath();cx.arc(s.x,s.y,s.r,0,Math.PI*2);cx.fillStyle=s.gold?`rgba(245,200,66,${a*.7})`:s.purple?`rgba(167,139,250,${a*.85})`:`rgba(232,224,248,${a*.6})`;cx.fill();});requestAnimationFrame(draw);}
+    resize();initS();draw();
+    window.addEventListener('resize',()=>{resize();initS();});
+  </script>
+</body>
+</html>

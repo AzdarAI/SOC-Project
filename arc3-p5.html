@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Arc III — Dark Zen Datang | The Secret of Crystal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--void:#04050d;--card:#080510;--border:#140d28;--crystal:#a78bfa;--crystal2:#7c3aed;--crystal3:#4c1d95;--gold:#f5c842;--gold2:#d4a017;--ember:#ff6b35;--danger:#f43f5e;--blood:#8b0000;--dark:#000000;--text:#e8e0f8;--muted:#6b5d94;--soft:rgba(232,224,248,.75);}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{background:var(--void);color:var(--text);font-family:'EB Garamond',Georgia,serif;min-height:100vh;overflow-x:hidden;cursor:none;}
+    #cur-dot{width:6px;height:6px;background:var(--crystal);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9999;box-shadow:0 0 12px var(--crystal),0 0 24px var(--crystal2);animation:curPulse 2s ease-in-out infinite;}
+    @keyframes curPulse{0%,100%{box-shadow:0 0 12px var(--crystal),0 0 24px var(--crystal2)}50%{box-shadow:0 0 20px var(--crystal),0 0 40px var(--crystal2),0 0 60px rgba(124,58,237,.3)}}
+    #cur-ring{width:28px;height:28px;border:1px solid var(--crystal);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9998;opacity:.4;}
+    #starfield{position:fixed;inset:0;z-index:0;pointer-events:none;}
+    .ambient{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 60% 60% at 50% 40%,rgba(76,29,149,.15) 0%,transparent 70%),radial-gradient(ellipse 30% 40% at 15% 80%,rgba(244,63,94,.06) 0%,transparent 60%);}
+    nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:60px;background:rgba(4,3,8,.92);backdrop-filter:blur(18px);border-bottom:1px solid rgba(124,58,237,.18);}
+    .nav-left{display:flex;align-items:center;gap:16px;}
+    .nav-back{font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.15em;color:var(--muted);text-decoration:none;text-transform:uppercase;display:flex;align-items:center;gap:6px;transition:color .2s;}
+    .nav-back:hover{color:var(--crystal);}
+    .nav-sep{width:1px;height:18px;background:var(--border);}
+    .nav-arc{font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.18em;color:var(--crystal);text-transform:uppercase;}
+    .nav-progress{display:flex;align-items:center;gap:8px;}
+    .prog-dot{width:8px;height:8px;border-radius:50%;border:1px solid var(--border);transition:all .3s;position:relative;}
+    .prog-dot a{display:block;width:100%;height:100%;border-radius:50%;}
+    .prog-dot.active{background:var(--crystal);border-color:var(--crystal);box-shadow:0 0 10px var(--crystal);}
+    .prog-dot.done{background:var(--gold2);border-color:var(--gold);}
+    .page{position:relative;z-index:2;max-width:780px;margin:0 auto;padding:110px 24px 140px;}
+    .chapter-header{text-align:center;margin-bottom:64px;opacity:0;animation:rise .9s .1s ease forwards;}
+    .ch-arc{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.35em;color:var(--gold);text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:18px;}
+    .ch-line{width:50px;height:1px;}
+    .ch-line.l{background:linear-gradient(90deg,transparent,var(--gold));}
+    .ch-line.r{background:linear-gradient(90deg,var(--gold),transparent);}
+    .chapter-num{font-family:'Cinzel Decorative',serif;font-size:clamp(2.5rem,6vw,4.5rem);font-weight:900;background:linear-gradient(135deg,var(--crystal) 0%,#fff 40%,var(--crystal2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;margin-bottom:16px;filter:drop-shadow(0 0 30px rgba(124,58,237,.6));}
+    .chapter-title{font-family:'Cinzel Decorative',serif;font-size:clamp(1rem,3vw,1.5rem);color:#fff;letter-spacing:.06em;margin-bottom:10px;}
+    .chapter-subtitle{font-family:'Cinzel',serif;font-size:.75rem;letter-spacing:.2em;color:var(--crystal2);text-transform:uppercase;margin-bottom:24px;}
+    .ch-divider{width:200px;height:1px;margin:0 auto;background:linear-gradient(90deg,transparent,var(--crystal2),var(--crystal),var(--crystal2),transparent);}
+    .story{opacity:0;animation:rise .9s .4s ease forwards;}
+    .opening-quote{border-left:2px solid var(--crystal3);padding:20px 0 20px 28px;margin-bottom:48px;position:relative;}
+    .opening-quote::before{content:'"';position:absolute;left:-2px;top:-10px;font-family:'Cinzel Decorative',serif;font-size:3rem;color:rgba(76,29,149,.3);line-height:1;}
+    .opening-quote p{font-size:clamp(1rem,2.5vw,1.2rem);font-style:italic;color:rgba(232,224,248,.85);line-height:1.9;}
+    .opening-quote cite{display:block;margin-top:12px;font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.2em;color:var(--crystal);text-transform:uppercase;}
+    .prose p{font-size:clamp(1rem,2vw,1.15rem);line-height:1.95;color:var(--soft);margin-bottom:28px;text-align:justify;hyphens:auto;}
+    .prose p:first-child::first-letter{font-family:'Cinzel Decorative',serif;font-size:3.8rem;font-weight:900;float:left;line-height:.8;margin:4px 12px 0 0;color:var(--crystal2);text-shadow:0 0 20px rgba(124,58,237,.7);}
+    .prose em{color:var(--gold);font-style:italic;}
+    .prose strong{color:#fff;font-weight:600;}
+    .story-break{display:flex;align-items:center;justify-content:center;gap:12px;margin:48px 0;font-size:.75rem;color:var(--muted);}
+    .story-break::before,.story-break::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);}
+    /* Lore boxes */
+    .lore-box{border-radius:4px;padding:20px 24px;margin:32px 0;}
+    .lore-box.crystal{background:rgba(124,58,237,.07);border:1px solid rgba(167,139,250,.2);border-left:3px solid var(--crystal);}
+    .lore-box.dark{background:rgba(0,0,0,.5);border:1px solid rgba(76,29,149,.3);border-left:3px solid var(--crystal3);}
+    .lore-box.danger{background:rgba(244,63,94,.05);border:1px solid rgba(244,63,94,.18);border-left:3px solid var(--danger);}
+    .lore-box.blood{background:rgba(139,0,0,.1);border:1px solid rgba(139,0,0,.3);border-left:3px solid var(--blood);}
+    .lore-box .lore-label{font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;margin-bottom:10px;}
+    .lore-box.crystal .lore-label{color:var(--crystal);}
+    .lore-box.dark .lore-label{color:var(--crystal2);}
+    .lore-box.danger .lore-label{color:var(--danger);}
+    .lore-box.blood .lore-label{color:var(--blood);}
+    .lore-box p{font-size:.95rem;font-style:italic;color:rgba(232,224,248,.65);line-height:1.8;margin:0;}
+    /* Dark Zen appearance */
+    .darkzen-visual{margin:36px 0;padding:32px;background:radial-gradient(ellipse 80% 80% at 50% 50%,rgba(0,0,0,.8) 0%,rgba(76,29,149,.1) 60%,transparent 100%);border:1px solid rgba(76,29,149,.4);border-radius:6px;text-align:center;position:relative;overflow:hidden;}
+    .darkzen-visual::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(76,29,149,.04) 2px,rgba(76,29,149,.04) 4px);pointer-events:none;}
+    .dz-icon{font-size:4rem;display:block;margin:0 auto 14px;filter:drop-shadow(0 0 20px rgba(76,29,149,.9)) grayscale(30%);animation:darkFloat 3s ease-in-out infinite;}
+    @keyframes darkFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+    .dz-name{font-family:'Cinzel Decorative',serif;font-size:1.3rem;color:rgba(167,139,250,.7);letter-spacing:.12em;margin-bottom:6px;text-shadow:0 0 20px rgba(76,29,149,.8);}
+    .dz-desc{font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;}
+    /* Dialogue */
+    .dialogue{margin:28px 0;}
+    .dialogue-line{display:flex;flex-direction:column;gap:4px;margin-bottom:16px;padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:4px;}
+    .dialogue-line.darkzen{border-left:3px solid var(--crystal3);}
+    .dialogue-line.ibza{border-left:3px solid var(--gold);}
+    .dialogue-line.rez{border-left:3px solid var(--crystal);}
+    .dialogue-line.rajax{border-left:3px solid var(--blood);}
+    .dialogue-line.eadc{border-left:3px solid var(--danger);}
+    .dialogue-speaker{font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;margin-bottom:5px;}
+    .dialogue-line.darkzen .dialogue-speaker{color:var(--crystal2);}
+    .dialogue-line.ibza .dialogue-speaker{color:var(--gold);}
+    .dialogue-line.rez .dialogue-speaker{color:var(--crystal);}
+    .dialogue-line.rajax .dialogue-speaker{color:var(--blood);}
+    .dialogue-line.eadc .dialogue-speaker{color:var(--danger);}
+    .dialogue-text{font-size:1rem;font-style:italic;color:rgba(232,224,248,.82);line-height:1.7;}
+    /* EADC description */
+    .eadc-box{background:linear-gradient(135deg,rgba(139,0,0,.15),rgba(76,29,149,.1));border:1px solid rgba(139,0,0,.3);border-radius:6px;padding:26px;margin:28px 0;position:relative;overflow:hidden;}
+    .eadc-box::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='20' height='20' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='1' cy='1' r='1' fill='rgba(139,0,0,0.15)'/%3E%3C/svg%3E");pointer-events:none;}
+    .eadc-title{font-family:'Cinzel Decorative',serif;font-size:.85rem;color:var(--danger);margin-bottom:6px;letter-spacing:.06em;}
+    .eadc-role{font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:.15em;color:var(--blood);text-transform:uppercase;margin-bottom:12px;}
+    .eadc-desc{font-size:.92rem;font-style:italic;color:rgba(232,224,248,.6);line-height:1.75;}
+    /* Finale */
+    .finale{margin-top:56px;padding:44px 36px;background:linear-gradient(135deg,rgba(76,29,149,.1),rgba(0,0,0,.4));border:1px solid rgba(124,58,237,.18);border-radius:6px;text-align:center;position:relative;overflow:hidden;}
+    .finale::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 70% at 50% 50%,rgba(124,58,237,.08) 0%,transparent 70%);pointer-events:none;}
+    .finale-label{font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.3em;color:var(--gold);text-transform:uppercase;margin-bottom:18px;}
+    .finale p{font-size:1.05rem;font-style:italic;color:rgba(232,224,248,.72);line-height:2.1;position:relative;z-index:1;}
+    .finale-sig{margin-top:28px;font-family:'Cinzel Decorative',serif;font-size:.88rem;color:var(--crystal);letter-spacing:.08em;}
+    .arc-complete{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:32px;font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.2em;color:var(--crystal);text-transform:uppercase;padding:13px 26px;border:1px solid rgba(167,139,250,.28);border-radius:3px;background:rgba(124,58,237,.06);width:fit-content;margin-left:auto;margin-right:auto;animation:shimmer 2.5s ease-in-out infinite;}
+    @keyframes shimmer{0%,100%{opacity:.6}50%{opacity:1}}
+    .nav-footer{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(4,3,8,.96);backdrop-filter:blur(16px);border-top:1px solid rgba(124,58,237,.14);display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:64px;}
+    .nav-btn{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--border);padding:9px 22px;border-radius:3px;display:flex;align-items:center;gap:8px;transition:all .25s;}
+    .nav-btn:hover{color:var(--crystal);border-color:var(--crystal);background:rgba(167,139,250,.05);}
+    .nav-btn.primary{color:var(--gold);border-color:var(--gold2);}
+    .nav-btn.primary:hover{background:rgba(245,200,66,.07);border-color:var(--gold);}
+    .nav-page-info{font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;}
+    .nav-page-info span{color:var(--crystal);}
+    @keyframes rise{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  </style>
+</head>
+<body>
+  <div id="cur-dot"></div><div id="cur-ring"></div>
+  <canvas id="starfield"></canvas>
+  <div class="ambient"></div>
+  <nav>
+    <div class="nav-left">
+      <a href="../story-hub.html" class="nav-back"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Story Hub</a>
+      <div class="nav-sep"></div>
+      <span class="nav-arc">Arc III · Dark Zen</span>
+    </div>
+    <div class="nav-progress">
+      <div class="prog-dot done"><a href="arc3-p1.html"></a></div>
+      <div class="prog-dot done"><a href="arc3-p2.html"></a></div>
+      <div class="prog-dot done"><a href="arc3-p3.html"></a></div>
+      <div class="prog-dot done"><a href="arc3-p4.html"></a></div>
+      <div class="prog-dot active"></div>
+    </div>
+  </nav>
+
+  <main class="page">
+    <header class="chapter-header">
+      <div class="ch-arc"><span class="ch-line l"></span>Arc III · Dark Zen<span class="ch-line r"></span></div>
+      <div class="chapter-num">Bagian V</div>
+      <h1 class="chapter-title">Dark Zen Datang</h1>
+      <div class="chapter-subtitle">Glitch Hitam · Rez vs Robot · Evil Angel Destiny Creature</div>
+      <div class="ch-divider"></div>
+    </header>
+
+    <article class="story">
+
+      <div class="opening-quote">
+        <p>Glitch hitam itu muncul pertama kali di ujung cakrawala — lalu dalam hitungan menit, langit Fearth berubah sepenuhnya menjadi kanvas hitam yang bergerak-gerak seperti layar televisi rusak.</p>
+        <cite>— Arc III · Dark Zen</cite>
+      </div>
+
+      <!-- DARK ZEN MUNCUL -->
+      <div class="prose">
+        <p>
+          Keesokan paginya — langit Fearth yang biasanya menampilkan gradasi ungu dan jingga saat fajar tiba-tiba menghilang. Bukan karena mendung. Bukan karena cuaca buruk. Melainkan karena sesuatu yang menutupi langit dari batas cakrawala ke cakrawala lainnya — sebuah lapisan hitam yang bergerak seperti piksel-piksel layar yang rusak, bergetar, dan berdenyut. Setiap makhluk hidup di Fearth yang melihatnya merasakan sesuatu yang aneh menghantam dadanya: bukan ketakutan, bukan dingin, melainkan sesuatu yang mirip dengan <em>kekosongan total.</em>
+        </p>
+        <p>
+          Glitch itu membesar. Meluas dari timur ke barat dalam hitungan menit. Dan dari lubang paling gelap di tengah glitch itu, sesuatu turun — bukan terbang, bukan jatuh. Melainkan <em>muncul</em>. Seperti seseorang yang melangkah keluar dari balik pintu yang tidak terlihat.
+        </p>
+      </div>
+
+      <div class="darkzen-visual">
+        <span class="dz-icon">🌑</span>
+        <div class="dz-name">Dark Zen</div>
+        <div class="dz-desc">Entitas Gelap · Separuh Jiwa · Senjata yang Hidup</div>
+      </div>
+
+      <div class="lore-box dark">
+        <div class="lore-label">🌑 Wujud Dark Zen</div>
+        <p>Tinggi, tanpa wajah yang terdefinisi jelas — seolah wajahnya selalu tertutup bayangan meski tidak ada sumber cahaya yang seharusnya membuat bayangan itu. Tubuhnya dikelilingi oleh lapisan hitam seperti tinta yang terus mengalir namun tidak pernah menetes ke bawah. Ia tidak bersuara. Tidak bernapas. Tidak bergerak dengan cara yang wajar. Setiap langkahnya meninggalkan noda hitam di tanah yang tidak bisa dihapus oleh apapun — dan di mana ia berdiri, gravitasi terasa sedikit lebih berat.</p>
+      </div>
+
+      <div class="story-break">✦ ✦ ✦</div>
+
+      <!-- ROBOT MENYERANG -->
+      <div class="prose">
+        <p>
+          Raja X — yang sudah mengetahui kedatangan Dark Zen dari mata-matanya — memerintahkan seluruh pasukan robot lini pertama untuk keluar dari bunker dan menghadang sosok itu. Ribuan robot baja dengan senjata plasma dan peluncur rudal berdiri berbaris di tanah yang sudah retak akibat kehadiran Dark Zen.
+        </p>
+        <p>
+          Mereka menembak serentak. Ribuan proyektil dan ledakan plasma menghantam titik di mana Dark Zen berdiri. Asap tebal dan debu memenuhi udara. Semua orang yang mengawasi dari kejauhan berharap itu sudah cukup.
+        </p>
+        <p>
+          Tidak.
+        </p>
+        <p>
+          Dari dalam asap itu, tangan panjang berwarna hitam pekat keluar — menangkap salah satu rudal yang masih melaju, lalu meremas penuh. Rudal itu hancur seperti remukan kertas basah. Dark Zen melangkah keluar dari asap tanpa secuil pun kerusakan pada tubuhnya. Ia menatap deretan robot-robot itu — lalu mengangkat satu tangannya.
+        </p>
+        <p>
+          Dalam satu gerakan — seluruh lini pertama robot itu terangkat ke udara, berputar-putar seperti lembaran kertas yang diterpa angin kencang, lalu dilempar ke segala arah. Beberapa menghantam dinding istana, beberapa menghancurkan tanah, beberapa lagi terbang sangat jauh hingga menghilang di balik cakrawala. <em>Tidak ada yang tersisa.</em>
+        </p>
+      </div>
+
+      <div class="lore-box danger">
+        <div class="lore-label">⚡ Rez Turun Tangan</div>
+        <p>Rez yang menyaksikan semuanya dari atas gedung yang tersisa menghela napas panjang. Ia merasakan Pure Crystal berdenyut di dadanya — bukan karena gelisah, melainkan karena siap. Dengan gerakan yang jauh lebih percaya diri dari dua minggu lalu, ia melompat dari gedung setinggi dua puluh lantai — dan mendarat tepat di antara Dark Zen dan reruntuhan istana. Kedua telapak tangannya memancarkan cahaya putih yang kontras dengan langit hitam di atasnya.</p>
+      </div>
+
+      <div class="dialogue">
+        <div class="dialogue-line rez">
+          <div class="dialogue-speaker">Rez — berdiri tegak</div>
+          <div class="dialogue-text">"Aku tidak tahu apakah kau bisa mendengarku. Tapi... aku tidak akan pergi dari sini."</div>
+        </div>
+        <div class="dialogue-line darkzen">
+          <div class="dialogue-speaker">Dark Zen — suara tanpa asal, terdengar dari semua arah</div>
+          <div class="dialogue-text">"...Kristal."</div>
+        </div>
+      </div>
+
+      <div class="prose">
+        <p>
+          Hanya satu kata. Namun berat kata itu terasa seperti satu ton batu yang jatuh di udara. Dark Zen melangkah maju — dan dalam sepersekian detik, tangan hitamnya sudah teracung ke arah Rez. Namun Rez sudah bergerak lebih dulu — Pure Crystal membentuk perisai setinggi dirinya yang menahan hantaman itu. Lantai di bawah kaki Rez retak hingga kedalaman tiga meter.
+        </p>
+        <p>
+          Pertarungan antara Rez dan Dark Zen berlangsung cepat dan brutal — Rez terus membangun perisai demi perisai, menciptakan ruang gerak agar tidak langsung dihancurkan. Dark Zen yang tidak terbiasa melawan sesuatu yang bisa <em>meresponsnya</em> mulai menunjukkan kelambatan kecil dalam gerakannya — seolah ia sedang menyesuaikan diri.
+        </p>
+        <p>
+          Namun itu cukup. Ibza muncul dari sisi kiri — menghantam Dark Zen dengan energi penuh yang ia kumpulkan selama sepuluh ribu tahun. Ledakan dahsyat melontarkan Dark Zen ratusan meter ke udara. Namun Dark Zen tidak jatuh. Ia melayang. Dan wajahnya yang tidak terdefinisi itu kini seolah mengarah tepat ke arah Ibza.
+        </p>
+      </div>
+
+      <div class="dialogue">
+        <div class="dialogue-line darkzen">
+          <div class="dialogue-speaker">Dark Zen</div>
+          <div class="dialogue-text">"...Zen."</div>
+        </div>
+        <div class="dialogue-line ibza">
+          <div class="dialogue-speaker">Ibza — dengan suara gemetar namun tidak mundur</div>
+          <div class="dialogue-text">"Ia tidak ada di sana lagi. Yang ada hanya kau — dan kau tidak seharusnya ada."</div>
+        </div>
+      </div>
+
+      <div class="story-break">⚔ ⚔ ⚔</div>
+
+      <!-- RAJA X KEMBALI -->
+      <div class="prose">
+        <p>
+          Di saat pertarungan itu berlangsung — Raja X keluar dari singgasananya untuk pertama kalinya dalam ratusan tahun. Ia melangkah ke halaman istana yang hancur, mengenakan jubah panjang hitam dengan tentakel yang kini jumlahnya sudah dua kali lipat dari biasanya. Matanya menatap Dark Zen yang melayang di udara — lalu menatap Ibza dan Rez.
+        </p>
+        <p>
+          Dan untuk pertama kalinya dalam ribuan tahun — Raja X tertawa. Bukan tertawa senang. Melainkan tertawa seperti seseorang yang baru saja menyadari bahwa semua bidak caturnya sudah berada tepat di posisi yang ia inginkan.
+        </p>
+      </div>
+
+      <div class="dialogue">
+        <div class="dialogue-line rajax">
+          <div class="dialogue-speaker">Raja X</div>
+          <div class="dialogue-text">"Ibza yang terhormat — akhirnya kau bebas juga. Sudah lama aku menunggu momen ini. Dan... kau bahkan membawa pewaris kristalmu sekalian. Sungguh menyenangkan."</div>
+        </div>
+        <div class="dialogue-line ibza">
+          <div class="dialogue-speaker">Ibza</div>
+          <div class="dialogue-text">"Kau tahu bahwa Dark Zen tidak dalam kendalimu."</div>
+        </div>
+        <div class="dialogue-line rajax">
+          <div class="dialogue-speaker">Raja X — tersenyum tipis</div>
+          <div class="dialogue-text">"Tidak perlu dikendalikan. Cukup diarahkan. Dan sesuatu yang selalu patuh... tidak perlu banyak arahan."</div>
+        </div>
+      </div>
+
+      <div class="lore-box blood">
+        <div class="lore-label">👁 Raja X & Dark Zen — Aliansi Tanpa Perjanjian</div>
+        <p>Ternyata — selama ribuan tahun, Raja X sudah mempelajari pola Dark Zen. Ia tahu bahwa Dark Zen selalu patuh tanpa pertanyaan — dan kali ini, Dark Zen muncul bukan atas kemauannya sendiri. Ada yang memanggilnya. Ada yang membuka celah di langit itu. Dan yang melakukan itu adalah Raja X sendiri, menggunakan artefak kuno yang ia temukan ribuan tahun lalu di reruntuhan dari masa sebelum ia berkuasa.</p>
+      </div>
+
+      <div class="story-break">✦ ✦ ✦</div>
+
+      <!-- EVIL ANGEL DESTINY CREATURE -->
+      <div class="prose">
+        <p>
+          Namun Raja X tidak hanya mengandalkan Dark Zen. Dari langit yang masih hitam pekat, sesuatu lain turun — bukan glitch, bukan entitas gelap. Melainkan sesuatu yang justru memancarkan cahaya. Cahaya putih bersih yang menyilaukan. Namun cahaya itu terasa salah. Terlalu terang. Terlalu sempurna. Seperti senyum yang tidak sampai ke mata.
+        </p>
+      </div>
+
+      <div class="eadc-box">
+        <div class="eadc-title">Evil Angel Destiny Creature</div>
+        <div class="eadc-role">EADC · Ciptaan Terlarang Raja X</div>
+        <div class="eadc-desc">Makhluk berbentuk seperti malaikat — sayap putih besar, tubuh ramping bercahaya, wajah tanpa ekspresi yang sempurna. Namun di balik penampilannya yang suci, EADC adalah makhluk yang diciptakan dari potongan-potongan jiwa para korban Raja X selama sepuluh ribu tahun. Setiap jiwa yang diambil menjadi bagian dari strukturnya. Ia tidak memiliki kehendak sendiri — hanya perintah. Dan ia diciptakan untuk satu tujuan: menghancurkan Pure Crystal.</div>
+      </div>
+
+      <div class="dialogue">
+        <div class="dialogue-line eadc">
+          <div class="dialogue-speaker">EADC — suara seperti paduan suara ribuan jiwa</div>
+          <div class="dialogue-text">"Serahkan kristal itu... dan kematianmu akan singkat."</div>
+        </div>
+        <div class="dialogue-line rez">
+          <div class="dialogue-speaker">Rez — menggenggam dadanya</div>
+          <div class="dialogue-text">"Kristal ini bukan milikku untuk diserahkan. Ia memilihku. Dan aku memilihnya kembali."</div>
+        </div>
+      </div>
+
+      <div class="prose">
+        <p>
+          Tiga kekuatan berdiri berhadapan: Rez dengan Pure Crystal, Ibza dengan energi sepuluh ribu tahun — melawan Dark Zen yang dipanggil dari kegelapan, EADC ciptaan jiwa-jiwa yang tersiksa, dan Raja X yang menatap semuanya dengan senyum yang tidak pernah berubah. Langit Fearth yang hitam berdenyut. Tanah retak semakin dalam. Angin berhenti sepenuhnya.
+        </p>
+        <p>
+          Dan dalam keheningan yang tiba-tiba itu — Pure Crystal di dada Rez berdenyut satu kali. Sangat kuat. Sangat jelas. Cahayanya menyebar ke seluruh tubuh Rez, membuatnya berdiri lebih tegak dari sebelumnya. Ia mengangkat tangannya — dan untuk pertama kalinya, cahaya yang keluar dari telapak tangannya bukan putih. Melainkan <em>seluruh warna sekaligus</em>, berputar seperti galaksi kecil yang baru saja lahir.
+        </p>
+        <p>
+          Di sinilah — di titik ini — <strong>pertarungan sesungguhnya dimulai.</strong>
+        </p>
+      </div>
+
+      <!-- FINALE -->
+      <div class="finale">
+        <div class="finale-label">✦ Arc III · Masih Berlanjut ✦</div>
+        <p>
+          Fearth berdiri di titik paling kritis dalam sejarahnya.<br/>
+          Seorang anak berusia sembilan tahun menggenggam kristal yang melampaui zaman.<br/>
+          Seorang legenda yang tersegel ribuan tahun kini berdiri di sisinya.<br/>
+          Dan di hadapan mereka — kegelapan yang tidak pernah mempertanyakan perintah,<br/>
+          makhluk cahaya yang lahir dari jiwa-jiwa yang direnggut paksa,<br/>
+          serta seorang raja yang sudah menunggu momen ini lebih lama dari siapapun.<br/><br/>
+          <em>Arc ini belum selesai ditulis.<br/>
+          Tapi satu hal yang pasti — Fearth tidak akan pernah sama lagi.</em>
+        </p>
+        <div class="finale-sig">— The Secret of Crystal · Arc III · Dark Zen —</div>
+      </div>
+
+      <div class="arc-complete">
+        🌑 &nbsp; Arc III · To Be Continued &nbsp; 🌑
+      </div>
+
+    </article>
+  </main>
+
+  <div class="nav-footer">
+    <a href="arc3-p4.html" class="nav-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Kembali</a>
+    <div class="nav-page-info">Halaman <span>5</span> / 5</div>
+    <a href="../story-hub.html" class="nav-btn primary">Story Hub<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+  </div>
+
+  <script>
+    const dot=document.getElementById('cur-dot'),ring=document.getElementById('cur-ring');
+    let mx=0,my=0,rx=0,ry=0;
+    document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;dot.style.left=mx-3+'px';dot.style.top=my-3+'px';});
+    (function loop(){rx+=(mx-rx-14)*.1;ry+=(my-ry-14)*.1;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(loop);})();
+    const cv=document.getElementById('starfield'),cx=cv.getContext('2d');
+    let W,H,stars=[];
+    function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight;}
+    function initS(){
+      stars=Array.from({length:220},()=>({
+        x:Math.random()*W,y:Math.random()*H,
+        r:Math.random()*1.2+.15,
+        a:Math.random()*.65,
+        sp:Math.random()*.18+.02,
+        tw:Math.random()*Math.PI*2,
+        purple:Math.random()<.2,
+        gold:Math.random()<.06,
+        black:Math.random()<.08
+      }));
+    }
+    function draw(){
+      cx.clearRect(0,0,W,H);
+      const t=Date.now()*.001;
+      stars.forEach(s=>{
+        const a=s.a*(.35+.65*Math.sin(t*s.sp+s.tw));
+        cx.beginPath();cx.arc(s.x,s.y,s.r,0,Math.PI*2);
+        if(s.gold) cx.fillStyle=`rgba(245,200,66,${a*.7})`;
+        else if(s.purple) cx.fillStyle=`rgba(124,58,237,${a*.9})`;
+        else if(s.black) cx.fillStyle=`rgba(76,29,149,${a*.5})`;
+        else cx.fillStyle=`rgba(232,224,248,${a*.45})`;
+        cx.fill();
+      });
+      requestAnimationFrame(draw);
+    }
+    resize();initS();draw();
+    window.addEventListener('resize',()=>{resize();initS();});
+  </script>
+</body>
+</html>

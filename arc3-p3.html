@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Arc III — Malam Paling Berat | The Secret of Crystal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--void:#04050d;--card:#0f0c18;--border:#1a1530;--crystal:#a78bfa;--crystal2:#7c3aed;--gold:#f5c842;--gold2:#d4a017;--ember:#ff6b35;--danger:#f43f5e;--blood:#8b0000;--text:#e8e0f8;--muted:#6b5d94;--soft:rgba(232,224,248,.75);}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{background:var(--void);color:var(--text);font-family:'EB Garamond',Georgia,serif;min-height:100vh;overflow-x:hidden;cursor:none;}
+    #cur-dot{width:6px;height:6px;background:var(--danger);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9999;box-shadow:0 0 10px var(--danger);}
+    #cur-ring{width:26px;height:26px;border:1px solid var(--danger);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9998;opacity:.35;}
+    #starfield{position:fixed;inset:0;z-index:0;pointer-events:none;}
+    .ambient{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 55% 50% at 50% 50%,rgba(139,0,0,.08) 0%,transparent 70%),radial-gradient(ellipse 35% 40% at 20% 30%,rgba(124,58,237,.07) 0%,transparent 65%);}
+    nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:60px;background:rgba(4,3,8,.88);backdrop-filter:blur(18px);border-bottom:1px solid rgba(244,63,94,.14);}
+    .nav-left{display:flex;align-items:center;gap:16px;}
+    .nav-back{font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.15em;color:var(--muted);text-decoration:none;text-transform:uppercase;display:flex;align-items:center;gap:6px;transition:color .2s;}
+    .nav-back:hover{color:var(--crystal);}
+    .nav-sep{width:1px;height:18px;background:var(--border);}
+    .nav-arc{font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.18em;color:var(--danger);text-transform:uppercase;}
+    .nav-progress{display:flex;align-items:center;gap:8px;}
+    .prog-dot{width:8px;height:8px;border-radius:50%;border:1px solid var(--border);transition:all .3s;position:relative;}
+    .prog-dot a{display:block;width:100%;height:100%;border-radius:50%;}
+    .prog-dot.active{background:var(--danger);border-color:var(--danger);box-shadow:0 0 8px var(--danger);}
+    .prog-dot.done{background:var(--gold2);border-color:var(--gold);}
+    .page{position:relative;z-index:2;max-width:780px;margin:0 auto;padding:110px 24px 120px;}
+    .chapter-header{text-align:center;margin-bottom:64px;opacity:0;animation:rise .9s .1s ease forwards;}
+    .ch-arc{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.35em;color:var(--gold);text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:18px;}
+    .ch-line{width:50px;height:1px;}
+    .ch-line.l{background:linear-gradient(90deg,transparent,var(--gold));}
+    .ch-line.r{background:linear-gradient(90deg,var(--gold),transparent);}
+    .chapter-num{font-family:'Cinzel Decorative',serif;font-size:clamp(2.5rem,6vw,4.5rem);font-weight:900;background:linear-gradient(135deg,#fff 0%,var(--danger) 55%,var(--blood) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;margin-bottom:16px;filter:drop-shadow(0 0 30px rgba(244,63,94,.5));}
+    .chapter-title{font-family:'Cinzel Decorative',serif;font-size:clamp(1rem,3vw,1.5rem);color:#fff;letter-spacing:.06em;margin-bottom:10px;}
+    .chapter-subtitle{font-family:'Cinzel',serif;font-size:.75rem;letter-spacing:.2em;color:var(--danger);text-transform:uppercase;margin-bottom:24px;}
+    .ch-divider{width:200px;height:1px;margin:0 auto;background:linear-gradient(90deg,transparent,var(--danger),var(--blood),var(--danger),transparent);}
+    .story{opacity:0;animation:rise .9s .4s ease forwards;}
+    .opening-quote{border-left:2px solid var(--blood);padding:20px 0 20px 28px;margin-bottom:48px;position:relative;}
+    .opening-quote::before{content:'"';position:absolute;left:-2px;top:-10px;font-family:'Cinzel Decorative',serif;font-size:3rem;color:rgba(139,0,0,.25);line-height:1;}
+    .opening-quote p{font-size:clamp(1rem,2.5vw,1.2rem);font-style:italic;color:rgba(232,224,248,.85);line-height:1.9;}
+    .opening-quote cite{display:block;margin-top:12px;font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.2em;color:var(--danger);text-transform:uppercase;}
+    .prose p{font-size:clamp(1rem,2vw,1.15rem);line-height:1.95;color:var(--soft);margin-bottom:28px;text-align:justify;hyphens:auto;}
+    .prose p:first-child::first-letter{font-family:'Cinzel Decorative',serif;font-size:3.8rem;font-weight:900;float:left;line-height:.8;margin:4px 12px 0 0;color:var(--danger);text-shadow:0 0 20px rgba(244,63,94,.5);}
+    .prose em{color:var(--gold);font-style:italic;}
+    .prose strong{color:#fff;font-weight:600;}
+    .story-break{display:flex;align-items:center;justify-content:center;gap:12px;margin:48px 0;font-size:.75rem;color:var(--muted);}
+    .story-break::before,.story-break::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);}
+    .lore-box{border-radius:4px;padding:20px 24px;margin:32px 0;}
+    .lore-box.blood{background:rgba(139,0,0,.1);border:1px solid rgba(139,0,0,.3);border-left:3px solid var(--blood);}
+    .lore-box.danger{background:rgba(244,63,94,.05);border:1px solid rgba(244,63,94,.18);border-left:3px solid var(--danger);}
+    .lore-box.crystal{background:rgba(124,58,237,.06);border:1px solid rgba(167,139,250,.18);border-left:3px solid var(--crystal);}
+    .lore-box .lore-label{font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;margin-bottom:10px;}
+    .lore-box.blood .lore-label{color:var(--blood);}
+    .lore-box.danger .lore-label{color:var(--danger);}
+    .lore-box.crystal .lore-label{color:var(--crystal);}
+    .lore-box p{font-size:.95rem;font-style:italic;color:rgba(232,224,248,.65);line-height:1.8;margin:0;}
+    .dialogue{margin:28px 0;}
+    .dialogue-line{display:flex;flex-direction:column;gap:4px;margin-bottom:16px;padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:4px;}
+    .dialogue-line.rajax{border-left:3px solid var(--blood);}
+    .dialogue-line.siri{border-left:3px solid #93c5fd;}
+    .dialogue-line.vraz{border-left:3px solid var(--ember);}
+    .dialogue-line.rez{border-left:3px solid var(--crystal);}
+    .dialogue-speaker{font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;margin-bottom:5px;}
+    .dialogue-line.rajax .dialogue-speaker{color:var(--blood);}
+    .dialogue-line.siri .dialogue-speaker{color:#93c5fd;}
+    .dialogue-line.vraz .dialogue-speaker{color:var(--ember);}
+    .dialogue-line.rez .dialogue-speaker{color:var(--crystal);}
+    .dialogue-text{font-size:1rem;font-style:italic;color:rgba(232,224,248,.82);line-height:1.7;}
+    /* Horror atmosphere block */
+    .horror-block{margin:28px 0;padding:24px 28px;background:rgba(0,0,0,.5);border:1px solid rgba(139,0,0,.25);border-radius:5px;position:relative;overflow:hidden;}
+    .horror-block::before{content:'👁';position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:3.5rem;opacity:.06;}
+    .horror-block p{font-size:.95rem;font-style:italic;color:rgba(232,224,248,.6);line-height:1.85;margin:0;}
+    /* Penghakiman steps */
+    .hukum-list{display:flex;flex-direction:column;gap:10px;margin:24px 0;}
+    .hukum-item{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:14px 18px;display:flex;gap:14px;}
+    .hukum-num{font-family:'Cinzel',serif;font-size:.62rem;color:var(--danger);min-width:24px;padding-top:3px;}
+    .hukum-text{font-size:.92rem;font-style:italic;color:var(--muted);line-height:1.65;}
+    .nav-footer{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(4,3,8,.94);backdrop-filter:blur(16px);border-top:1px solid rgba(244,63,94,.12);display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:64px;}
+    .nav-btn{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--border);padding:9px 22px;border-radius:3px;display:flex;align-items:center;gap:8px;transition:all .25s;}
+    .nav-btn:hover{color:var(--crystal);border-color:var(--crystal);background:rgba(167,139,250,.05);}
+    .nav-btn.primary{color:var(--gold);border-color:var(--gold2);}
+    .nav-btn.primary:hover{background:rgba(245,200,66,.07);border-color:var(--gold);}
+    .nav-page-info{font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;}
+    .nav-page-info span{color:var(--danger);}
+    @keyframes rise{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  </style>
+</head>
+<body>
+  <div id="cur-dot"></div><div id="cur-ring"></div>
+  <canvas id="starfield"></canvas>
+  <div class="ambient"></div>
+  <nav>
+    <div class="nav-left">
+      <a href="../story-hub.html" class="nav-back"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Story Hub</a>
+      <div class="nav-sep"></div>
+      <span class="nav-arc">Arc III · Dark Zen</span>
+    </div>
+    <div class="nav-progress">
+      <div class="prog-dot done"><a href="arc3-p1.html"></a></div>
+      <div class="prog-dot done"><a href="arc3-p2.html"></a></div>
+      <div class="prog-dot active"></div>
+      <div class="prog-dot"><a href="arc3-p4.html"></a></div>
+      <div class="prog-dot"><a href="arc3-p5.html"></a></div>
+    </div>
+  </nav>
+
+  <main class="page">
+    <header class="chapter-header">
+      <div class="ch-arc"><span class="ch-line l"></span>Arc III · Dark Zen<span class="ch-line r"></span></div>
+      <div class="chapter-num">Bagian III</div>
+      <h1 class="chapter-title">Malam Paling Berat</h1>
+      <div class="chapter-subtitle">Mata Raja X · Siri Gugur · Vraz Melindungi</div>
+      <div class="ch-divider"></div>
+    </header>
+
+    <article class="story">
+
+      <div class="opening-quote">
+        <p>Siri tidak menyadari sebuah bola cahaya merah mengikutinya sedari tadi — keluar dari sebuah hiasan permata di pintu ruangan Raja X yang megah dan mewah itu.</p>
+        <cite>— Arc III · Dark Zen</cite>
+      </div>
+
+      <div class="prose">
+        <p>
+          Kembali ke istana, Siri seperti biasa melayani beberapa bangsawan. Ia melewati ruangan sang Raja X yang biasanya dijaga ketat oleh para pengawal — namun kini sangat sepi. Tanpa disengaja, ia mendengar sesuatu yang sangat mengejutkan dan seharusnya tidak ia dengar dari balik pintu megah itu. Siri hanya bisa terus berjalan melewati lorong panjang dan segera kembali ke ruangannya — lalu segera memberitahu Hylios melalui lensa mata yang sudah ia kenakan.
+        </p>
+        <p>
+          Yang tidak ia sadari: sebuah bola cahaya merah keluar dari hiasan permata di pintu ruangan Raja X, masuk ke dalam ruangannya melalui celah kunci pintu — lalu berubah menjadi bola mata seukuran bola kasti yang memerhatikan setiap gerak-geriknya.
+        </p>
+      </div>
+
+      <div class="lore-box blood">
+        <div class="lore-label">👁 Mata Merah Raja X</div>
+        <p>Ini adalah salah satu dari kekuatan Raja X untuk mengintai seseorang yang mencurigakan di dalam istananya. Bola mata itu mengikuti setiap langkah Siri — dan setiap kali ia berbicara kepada Hylios melalui lensa, semua yang ia katakan terrekam oleh mata itu.</p>
+      </div>
+
+      <div class="prose">
+        <p>
+          Siri yang mulai menyadari keberadaan bola mata itu mencoba mematikan lampu dan berpura-pura hendak tidur agar mata itu menghilang. Ia diam-diam melepaskan lensa mata dan meletakkannya di kalungnya — agar ketika ia tidur, Hylios bisa menjaganya dan memberitahunya jika sesuatu terjadi.
+        </p>
+        <p>
+          Beberapa menit setelah Siri terlelap — bola mata bercahaya itu berubah menjadi mata besar sempurna dengan kelopak mata bahkan bulu mata yang mengambang di atas langit-langit ruangannya. Warna bola matanya yang semula hitam berubah menjadi merah darah, meneteskan tetesan-tetesan darah yang tidak terhitung jumlahnya — memenuhi meja dan lantai kamar Siri, semakin lama semakin tinggi.
+        </p>
+      </div>
+
+      <div class="horror-block">
+        <p>Beberapa jam sebelum pagi hari — ruangan Siri kini dipenuhi oleh cairan darah yang bahkan sudah bisa menenggelamkan Siri, menghanyutkannya di dalam kamarnya sendiri. Sebelum kehilangan kesadaran, Hylios meneriakkannya melalui lensa — namun Siri tidak merespons. Hylios menekan sebuah tombol dari tempatnya yang seketika membuat lensa menyambarkan aliran listrik yang besar. Siri terbangun — sadar bahwa ia sedang tenggelam. Sambaran listrik itu merambat melalui cairan darah, mengenai mata besar itu, dan membuatnya terpejam lalu menghilang seperti blackhole yang menghisap semua yang telah ia keluarkan.</p>
+      </div>
+
+      <div class="prose">
+        <p>
+          Siri terjatuh ke kasurnya. Cairan itu menghilang bersamaan dengan menghilangnya mata besar itu. Ia segera mencoba mengambil napas — mengeluarkan semua cairan yang masuk ke tubuhnya. Beruntung ia tidak mati, meskipun sudah tenggelam cukup lama bahkan setelah tersambar aliran listrik besar. Namun ia harus kehilangan perangkat lensa akibat sambaran listrik itu.
+        </p>
+        <p>
+          Saat membersihkan diri, sesuatu yang janggal terlintas di benaknya — saat tenggelam, ia bermimpi seakan seseorang meminta tolong kepadanya. Tangisan merah darah dari mata itu bukan hanya bertujuan membunuhnya. Sesuatu berkata lain. Dan saat ia tenggelam di pelukannya, mata itu seperti menyebutkan kata <em>"kami"</em> — seolah banyak orang yang meminta dibebaskan.
+        </p>
+      </div>
+
+      <div class="story-break">⚔ ⚔ ⚔</div>
+
+      <div class="prose">
+        <p>
+          Kembali ke kamarnya untuk berganti baju — tanpa ia sadari, <strong>Sang Raja X</strong> sedang duduk di kursi empuknya dengan gaya khasnya. Tersenyum lebar. Mata yang memiliki pola aneh. Baju besi yang hanya menutupi setengah tubuh bagian atasnya. Tentakel yang selalu berada di bahu sebelah kanannya bagaikan ular peliharaan yang selalu menempel pada tuannya.
+        </p>
+      </div>
+
+      <div class="dialogue">
+        <div class="dialogue-line siri">
+          <div class="dialogue-speaker">Siri — dengan suara gemetar</div>
+          <div class="dialogue-text">"A- apa yang kau butuhkan, Y-Yang Mulia..."</div>
+        </div>
+        <div class="dialogue-line rajax">
+          <div class="dialogue-speaker">Raja X</div>
+          <div class="dialogue-text">"Ah... tidak apa-apa. Kau hanya mengingatkanku pada salah satu istriku 5.000 tahun yang lalu..."</div>
+        </div>
+        <div class="dialogue-line siri">
+          <div class="dialogue-speaker">Siri</div>
+          <div class="dialogue-text">"T-terima kasih Yang Mulia... saya menghargai pujian itu..."</div>
+        </div>
+        <div class="dialogue-line rajax">
+          <div class="dialogue-speaker">Raja X — berbisik, mengangkat dagu Siri</div>
+          <div class="dialogue-text">"Kau... mirip sekali dengan istriku. Istriku yang mengkhianatiku... lima ribu tahun lalu. Dan kau menghargainya...?"</div>
+        </div>
+      </div>
+
+      <div class="lore-box danger">
+        <div class="lore-label">🩸 Siri Gugur</div>
+        <p>Raja X menusukkan salah satu jarinya ke bagian tengah dada Siri dengan perlahan — kemudian menghilang begitu saja tanpa suara, meninggalkan Siri terjatuh ke lantai dengan darah bersimbah. Siri yang kesakitan masih mencoba berdiri — sebelum akhirnya ia tumbang dan tak sadarkan diri. Penghakiman terus berlangsung di ruangan lain. Tetesan demi tetesan api telah membakar Siri — membunuhnya dalam proses yang sangat menyayat hati.</p>
+      </div>
+
+      <div class="story-break">✦ ✦ ✦</div>
+
+      <!-- HARI ULANG TAHUN REZ & PENGHAKIMAN -->
+      <div class="prose">
+        <p>
+          Vraz — ayah Rez — menemukan kotak hologram Hylios di kamar anaknya. Ia membaca semuanya bersama istrinya Fath — dan mereka berdua terpukul sekaligus berharap kepada Rez. Mereka bersumpah untuk melindunginya agar misi yang ia jalani tidak menjadi lebih berat dari yang seharusnya.
+        </p>
+        <p>
+          Hari itu adalah hari ulang tahun Rez. Namun pesta itu tiba-tiba dirusak oleh para prajurit kerajaan yang menyerbu dan menangkap beberapa orang yang dianggap mencurigakan — termasuk Siri. Mereka dibawa ke tempat penghakiman di hadapan Sang Raja X.
+        </p>
+      </div>
+
+      <div class="hukum-list">
+        <div class="hukum-item"><div class="hukum-num">01</div><div class="hukum-text">Beberapa orang mengakui tuduhan — langsung dibakar oleh Raja X.</div></div>
+        <div class="hukum-item"><div class="hukum-num">02</div><div class="hukum-text">Yang tidak mengakui — diteteskan api setetes demi setetes sampai mengaku karena tak tahan.</div></div>
+        <div class="hukum-item"><div class="hukum-num">03</div><div class="hukum-text">Siri dipanggil — kursi rodanya dihancurkan Raja X. Ia diteteskan api perlahan dalam kondisi yang sudah sekarat.</div></div>
+        <div class="hukum-item"><div class="hukum-num">04</div><div class="hukum-text">Rez menyaksikan semuanya dengan mata berkaca-kaca. Lensa matanya merekam secara langsung — Hylios menyaksikan penyiksaan Siri dari kejauhan, meneteskan air mata.</div></div>
+      </div>
+
+      <div class="prose">
+        <p>
+          Rez yang sudah tak tahan lagi ingin berteriak menyuruh Raja X berhenti — namun tiba-tiba ayahnya datang dari balik bayangan, menutup mulutnya dengan cepat tanpa sepatah kata, dan membawanya pergi dari tempat itu.
+        </p>
+        <p>
+          Mereka berkumpul di ruangan mereka. Rez menangis dalam dekapan ayahnya — membuat mereka semua sedih. Sang ibu menyanyikan lagu selamat ulang tahun kepada anaknya. Sang kakak mengambilkan kue ulang tahun yang masih utuh. Rez perlahan menghilangkan kesedihan dari raut wajahnya — berubah menjadi tawa riang yang masih terbayang-bayang kesedihan.
+        </p>
+      </div>
+
+      <div class="story-break">⚔ ⚔ ⚔</div>
+
+      <!-- VRAZ vs RAJA X -->
+      <div class="prose">
+        <p>
+          Vraz kembali dari luar istana dan melihat tentakel panjang menggeliat menembus tembok lorong — sangat dekat menuju ruangan keluarganya. Ia berlari kembali dan memberi kode kepada istrinya. Mereka mengemas pakaian dengan tergesa-gesa. Vraz memasangkan kalung pelindung yang memancarkan cahaya seperti kristal kepada kedua anaknya di balkon.
+        </p>
+        <p>
+          Namun saat itu — lima tentakel sebesar tongkat baseball menusuk tembok-tembok ruangan itu hingga ke arah balkon, menghancurkan segalanya dengan sangat agresif. Lubang lingkaran raksasa terbuka — dan dari sana, tatapan Sang Raja X langsung tertuju pada Vraz yang gemetar memohon agar keluarganya tidak dibunuh.
+        </p>
+      </div>
+
+      <div class="dialogue">
+        <div class="dialogue-line rajax">
+          <div class="dialogue-speaker">Raja X — dari singgasananya</div>
+          <div class="dialogue-text">"Jika satu-satunya cara untuk selamat adalah mengorbankan satu dari kalian — dan yang dikorbankan akan dibakar hidup-hidup sambil sadar sepenuhnya — siapa yang akan kau seret lebih dulu ke dalam api?"</div>
+        </div>
+      </div>
+
+      <div class="prose">
+        <p>
+          Vraz berteriak lantang — menutupi suara drone yang mengangkut kedua anaknya dari balkon untuk melarikan diri. Namun bola merah pekat di tangannya Raja X menyala terang. Darah dari mata kanan Raja X mengalir deras — seolah ia menangis karena merindukan sesuatu. Raja X berbisik:
+        </p>
+      </div>
+
+      <div class="dialogue">
+        <div class="dialogue-line rajax">
+          <div class="dialogue-speaker">Raja X</div>
+          <div class="dialogue-text">"Akhirnya keturunanmu bekerja... Ibza..."</div>
+        </div>
+      </div>
+
+      <div class="prose">
+        <p>
+          Darah basah di lantai berubah menjadi jutaan duri tajam berwarna merah darah — drone yang dinaiki Alicia dan Rez tertahan oleh duri yang menusuk drone dan menembus tubuh Alicia. Vraz tertusuk oleh duri dengan ukuran yang beragam — duri sebesar tiang listrik menusuk dadanya. Mata yang semula menyala terang menjadi redup. <strong>Vraz mati dalam kejadian itu.</strong>
+        </p>
+        <p>
+          Vraz yang sekarat parah namun masih hidup mengeluarkan sebuah cahaya dari dalam tubuhnya — Pure Crystal. Cahaya itu terbang ke arah Rez dengan sangat pelan. Raja X yang melihat itu segera menembakkan cahaya merah dari tangan kanannya — tepat mengenai Pure Crystal yang sedang terbang menuju Rez. Ledakan dahsyat mengguncang hampir setengah istana.
+        </p>
+      </div>
+
+      <div class="lore-box crystal">
+        <div class="lore-label">💎 Namun Pure Crystal Tidak Hancur</div>
+        <p>Raja X tersenyum puas, yakin telah menghancurkan satu-satunya hal yang pernah membuatnya gentar. Namun "Padahal tidak…" — bisik Rez lirih, tersungkur di lantai penuh debu. Ia masih hidup — diselamatkan oleh cahaya putih pekat yang memeluknya erat, menciptakan ruang kosong di sekelilingnya, menahan setiap reruntuhan agar tak menyentuhnya.</p>
+      </div>
+
+    </article>
+  </main>
+
+  <div class="nav-footer">
+    <a href="arc3-p2.html" class="nav-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Kembali</a>
+    <div class="nav-page-info">Halaman <span>3</span> / 5</div>
+    <a href="arc3-p4.html" class="nav-btn primary">Lanjut<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+  </div>
+
+  <script>
+    const dot=document.getElementById('cur-dot'),ring=document.getElementById('cur-ring');
+    let mx=0,my=0,rx=0,ry=0;
+    document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;dot.style.left=mx-3+'px';dot.style.top=my-3+'px';});
+    (function loop(){rx+=(mx-rx-13)*.1;ry+=(my-ry-13)*.1;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(loop);})();
+    const cv=document.getElementById('starfield'),cx=cv.getContext('2d');
+    let W,H,stars=[];
+    function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight;}
+    function initS(){stars=Array.from({length:160},()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.1+.15,a:Math.random()*.7,sp:Math.random()*.2+.03,tw:Math.random()*Math.PI*2,red:Math.random()<.1}));}
+    function draw(){cx.clearRect(0,0,W,H);const t=Date.now()*.001;stars.forEach(s=>{const a=s.a*(.35+.65*Math.sin(t*s.sp+s.tw));cx.beginPath();cx.arc(s.x,s.y,s.r,0,Math.PI*2);cx.fillStyle=s.red?`rgba(139,0,0,${a*.7})`:`rgba(232,224,248,${a*.5})`;cx.fill();});requestAnimationFrame(draw);}
+    resize();initS();draw();
+    window.addEventListener('resize',()=>{resize();initS();});
+  </script>
+</body>
+</html>

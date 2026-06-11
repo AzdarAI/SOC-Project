@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Secret of Crystal — Story Hub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ==============================
+       ROOT & RESET
+    ============================== */
+    :root {
+      --void:       #04050d;
+      --deep:       #07091a;
+      --surface:    #0d1028;
+      --card:       #10142e;
+      --border:     #1c2150;
+      --crystal:    #a78bfa;
+      --crystal2:   #7c3aed;
+      --gold:       #f5c842;
+      --gold2:      #d4a017;
+      --ember:      #ff6b35;
+      --ice:        #93c5fd;
+      --text:       #e2e0f0;
+      --muted:      #6b6d94;
+      --danger:     #f43f5e;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--void);
+      color: var(--text);
+      font-family: 'EB Garamond', Georgia, serif;
+      overflow-x: hidden;
+      cursor: none;
+      min-height: 100vh;
+    }
+
+    /* ==============================
+       CUSTOM CURSOR
+    ============================== */
+    #cur-dot {
+      width: 6px; height: 6px;
+      background: var(--gold);
+      border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none; z-index: 9999;
+      box-shadow: 0 0 10px var(--gold), 0 0 20px var(--gold2);
+      transition: transform .1s;
+    }
+    #cur-ring {
+      width: 28px; height: 28px;
+      border: 1px solid var(--crystal);
+      border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none; z-index: 9998;
+      opacity: .5;
+    }
+
+    /* ==============================
+       CANVAS BACKGROUND (stars)
+    ============================== */
+    #starfield {
+      position: fixed; inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ==============================
+       NOISE OVERLAY
+    ============================== */
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: .025;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ==============================
+       LAYOUT WRAPPER
+    ============================== */
+    .wrapper {
+      position: relative;
+      z-index: 2;
+    }
+
+    /* ==============================
+       TOP NAV
+    ============================== */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 48px;
+      height: 64px;
+      background: rgba(4,5,13,.75);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(167,139,250,.1);
+    }
+    .nav-brand {
+      font-family: 'Cinzel', serif;
+      font-size: .8rem;
+      letter-spacing: .2em;
+      color: var(--gold);
+      text-decoration: none;
+      text-transform: uppercase;
+    }
+    .nav-links {
+      display: flex; gap: 4px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-family: 'Cinzel', serif;
+      font-size: .65rem;
+      letter-spacing: .15em;
+      color: var(--muted);
+      text-decoration: none;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border-radius: 4px;
+      border: 1px solid transparent;
+      transition: all .25s;
+    }
+    .nav-links a:hover {
+      color: var(--crystal);
+      border-color: rgba(167,139,250,.3);
+      background: rgba(167,139,250,.05);
+    }
+
+    /* ==============================
+       HERO
+    ============================== */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      padding: 80px 24px 60px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* big crystal glow behind title */
+    .hero-glow {
+      position: absolute;
+      width: 700px; height: 700px;
+      border-radius: 50%;
+      background: radial-gradient(ellipse, rgba(124,58,237,.18) 0%, rgba(167,139,250,.08) 40%, transparent 70%);
+      pointer-events: none;
+      animation: glow-breathe 6s ease-in-out infinite;
+    }
+    @keyframes glow-breathe {
+      0%,100% { transform: scale(1); opacity: .6; }
+      50%      { transform: scale(1.08); opacity: 1; }
+    }
+
+    /* floating crystal shards decoration */
+    .shard {
+      position: absolute;
+      pointer-events: none;
+      opacity: 0;
+      animation: shard-float linear infinite;
+    }
+    @keyframes shard-float {
+      0%   { opacity: 0; transform: translateY(0) rotate(0deg); }
+      10%  { opacity: .6; }
+      90%  { opacity: .3; }
+      100% { opacity: 0; transform: translateY(-120px) rotate(180deg); }
+    }
+
+    .hero-eyebrow {
+      font-family: 'Cinzel', serif;
+      font-size: .72rem;
+      letter-spacing: .35em;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      opacity: 0;
+      animation: rise .9s .2s ease forwards;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .eyebrow-line {
+      width: 40px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold));
+    }
+    .eyebrow-line.r {
+      background: linear-gradient(90deg, var(--gold), transparent);
+    }
+
+    h1.hero-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(2.2rem, 7vw, 5.5rem);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: .04em;
+      color: #fff;
+      text-shadow:
+        0 0 40px rgba(167,139,250,.6),
+        0 0 80px rgba(167,139,250,.3),
+        0 2px 4px rgba(0,0,0,.8);
+      opacity: 0;
+      animation: rise .9s .4s ease forwards;
+      margin-bottom: 6px;
+    }
+    .title-sub {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(1rem, 3vw, 2rem);
+      color: var(--gold);
+      letter-spacing: .12em;
+      text-shadow: 0 0 20px rgba(245,200,66,.5);
+      opacity: 0;
+      animation: rise .9s .55s ease forwards;
+      margin-bottom: 32px;
+    }
+
+    .hero-divider {
+      width: 220px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--crystal), var(--gold), var(--crystal), transparent);
+      margin: 0 auto 32px;
+      opacity: 0;
+      animation: rise .9s .65s ease forwards;
+    }
+
+    .hero-lore {
+      max-width: 560px;
+      font-size: 1.05rem;
+      font-style: italic;
+      color: rgba(226,224,240,.7);
+      line-height: 1.9;
+      opacity: 0;
+      animation: rise .9s .75s ease forwards;
+      margin-bottom: 52px;
+    }
+
+    .hero-cta {
+      display: inline-flex; align-items: center; gap: 10px;
+      font-family: 'Cinzel', serif;
+      font-size: .8rem;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--void);
+      background: linear-gradient(135deg, var(--gold), var(--gold2));
+      padding: 14px 36px;
+      border-radius: 3px;
+      text-decoration: none;
+      opacity: 0;
+      animation: rise .9s .9s ease forwards;
+      box-shadow: 0 0 30px rgba(245,200,66,.3);
+      transition: box-shadow .3s, transform .3s;
+    }
+    .hero-cta:hover {
+      box-shadow: 0 0 50px rgba(245,200,66,.5);
+      transform: translateY(-2px);
+    }
+    .hero-cta svg { width: 14px; height: 14px; }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* scroll indicator */
+    .scroll-hint {
+      position: absolute; bottom: 30px; left: 50%;
+      transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      font-family: 'Cinzel', serif;
+      font-size: .6rem;
+      letter-spacing: .2em;
+      color: var(--muted);
+      opacity: 0;
+      animation: rise 1s 1.3s ease forwards;
+    }
+    .scroll-arrow {
+      width: 18px; height: 18px;
+      border-right: 1px solid var(--muted);
+      border-bottom: 1px solid var(--muted);
+      transform: rotate(45deg);
+      animation: bounce 1.8s ease-in-out infinite;
+    }
+    @keyframes bounce { 0%,100%{transform:rotate(45deg) translateY(0)} 50%{transform:rotate(45deg) translateY(5px)} }
+
+    /* ==============================
+       SECTION SHARED
+    ============================== */
+    section {
+      position: relative; z-index: 2;
+      padding: 80px 24px;
+    }
+    .section-inner {
+      max-width: 1040px;
+      margin: 0 auto;
+    }
+    .section-label {
+      font-family: 'Cinzel', serif;
+      font-size: .68rem;
+      letter-spacing: .3em;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, var(--border), transparent);
+    }
+    h2.section-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(1.4rem, 4vw, 2.2rem);
+      color: #fff;
+      margin-bottom: 14px;
+      text-shadow: 0 0 30px rgba(167,139,250,.3);
+    }
+    .section-desc {
+      font-size: 1rem;
+      color: var(--muted);
+      font-style: italic;
+      max-width: 600px;
+      margin-bottom: 48px;
+      line-height: 1.8;
+    }
+
+    /* ==============================
+       ARC CARDS
+    ============================== */
+    .arcs-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    @media(max-width: 860px){ .arcs-grid { grid-template-columns: 1fr; } }
+
+    .arc-card {
+      position: relative;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      text-decoration: none;
+      color: inherit;
+      display: flex; flex-direction: column;
+      transition: transform .4s cubic-bezier(.2,.8,.2,1), box-shadow .4s, border-color .4s;
+    }
+    .arc-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,.7) 100%);
+      z-index: 1;
+    }
+    .arc-card:hover {
+      transform: translateY(-8px);
+    }
+
+    /* card-specific accent colors */
+    .arc-card.arc1 { --c: var(--crystal); --c2: var(--crystal2); }
+    .arc-card.arc2 { --c: var(--gold);    --c2: var(--gold2); }
+    .arc-card.arc3 { --c: var(--danger);  --c2: #9f1239; }
+
+    .arc-card:hover { border-color: var(--c); box-shadow: 0 0 40px rgba(0,0,0,.5), 0 0 0 1px var(--c); }
+
+    /* top glow strip */
+    .arc-card .glow-strip {
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--c), var(--c2), var(--c), transparent);
+      z-index: 3;
+      opacity: 0;
+      transition: opacity .4s;
+    }
+    .arc-card:hover .glow-strip { opacity: 1; }
+
+    /* card visual (top illustration area) */
+    .arc-visual {
+      height: 200px;
+      position: relative;
+      overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .arc-visual-bg {
+      position: absolute; inset: 0;
+      transition: transform .6s ease;
+    }
+    .arc-card:hover .arc-visual-bg { transform: scale(1.06); }
+
+    /* arc 1 — living realm */
+    .arc1 .arc-visual-bg {
+      background:
+        radial-gradient(ellipse 60% 60% at 50% 40%, rgba(124,58,237,.5) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 80% 70%, rgba(147,197,253,.2) 0%, transparent 60%),
+        linear-gradient(160deg, #070a1f 0%, #0f1535 50%, #1a0a2e 100%);
+    }
+    /* arc 2 — ibza */
+    .arc2 .arc-visual-bg {
+      background:
+        radial-gradient(ellipse 60% 60% at 50% 40%, rgba(245,200,66,.35) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 20% 70%, rgba(255,107,53,.2) 0%, transparent 60%),
+        linear-gradient(160deg, #0f0800 0%, #1a0f00 50%, #2a1400 100%);
+    }
+    /* arc 3 — dark zen */
+    .arc3 .arc-visual-bg {
+      background:
+        radial-gradient(ellipse 60% 60% at 50% 40%, rgba(244,63,94,.3) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 80% 30%, rgba(139,0,0,.3) 0%, transparent 60%),
+        linear-gradient(160deg, #0d0004 0%, #160008 50%, #0a000d 100%);
+    }
+
+    .arc-icon {
+      position: relative; z-index: 2;
+      font-size: 3.5rem;
+      filter: drop-shadow(0 0 20px var(--c));
+      animation: icon-pulse 3s ease-in-out infinite;
+    }
+    @keyframes icon-pulse {
+      0%,100% { filter: drop-shadow(0 0 16px var(--c)); transform: scale(1); }
+      50%      { filter: drop-shadow(0 0 30px var(--c)); transform: scale(1.07); }
+    }
+
+    /* number badge */
+    .arc-num {
+      position: absolute; top: 16px; left: 16px;
+      font-family: 'Cinzel Decorative', serif;
+      font-size: .65rem;
+      color: var(--c);
+      border: 1px solid var(--c);
+      padding: 3px 10px;
+      border-radius: 2px;
+      letter-spacing: .15em;
+      z-index: 3;
+      background: rgba(4,5,13,.6);
+      backdrop-filter: blur(4px);
+    }
+
+    /* status badge */
+    .arc-status {
+      position: absolute; top: 16px; right: 16px;
+      font-family: 'Cinzel', serif;
+      font-size: .58rem;
+      letter-spacing: .12em;
+      padding: 3px 10px;
+      border-radius: 2px;
+      z-index: 3;
+      text-transform: uppercase;
+    }
+    .arc-status.complete {
+      background: rgba(79,205,128,.12);
+      border: 1px solid rgba(79,205,128,.4);
+      color: #4fcd80;
+    }
+    .arc-status.ongoing {
+      background: rgba(245,200,66,.1);
+      border: 1px solid rgba(245,200,66,.3);
+      color: var(--gold);
+    }
+    .arc-status.soon {
+      background: rgba(244,63,94,.1);
+      border: 1px solid rgba(244,63,94,.3);
+      color: var(--danger);
+    }
+
+    /* card body */
+    .arc-body {
+      position: relative; z-index: 2;
+      padding: 24px;
+      display: flex; flex-direction: column; flex: 1;
+    }
+    .arc-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(.9rem, 2vw, 1.1rem);
+      color: #fff;
+      margin-bottom: 6px;
+      text-shadow: 0 0 20px var(--c);
+      line-height: 1.3;
+    }
+    .arc-subtitle {
+      font-family: 'Cinzel', serif;
+      font-size: .7rem;
+      letter-spacing: .15em;
+      color: var(--c);
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .arc-desc {
+      font-size: .92rem;
+      font-style: italic;
+      color: rgba(226,224,240,.6);
+      line-height: 1.75;
+      flex: 1;
+      margin-bottom: 24px;
+    }
+    .arc-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+    }
+    .arc-chapters {
+      font-family: 'Cinzel', serif;
+      font-size: .62rem;
+      letter-spacing: .1em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .arc-chapters span { color: var(--c); }
+    .arc-btn {
+      font-family: 'Cinzel', serif;
+      font-size: .65rem;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--c);
+      border: 1px solid var(--c);
+      padding: 7px 16px;
+      border-radius: 2px;
+      text-decoration: none;
+      background: transparent;
+      transition: background .25s, color .25s;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .arc-btn:hover {
+      background: var(--c);
+      color: var(--void);
+    }
+    .arc-btn.disabled {
+      opacity: .4;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    /* ==============================
+       LORE / WORLD SECTION
+    ============================== */
+    .lore-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    @media(max-width: 860px){ .lore-grid { grid-template-columns: repeat(2,1fr); } }
+    @media(max-width: 500px){ .lore-grid { grid-template-columns: 1fr; } }
+
+    .lore-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 22px 20px;
+      transition: border-color .3s, box-shadow .3s;
+    }
+    .lore-card:hover {
+      border-color: rgba(167,139,250,.3);
+      box-shadow: 0 0 20px rgba(124,58,237,.08);
+    }
+    .lore-icon { font-size: 1.8rem; margin-bottom: 12px; }
+    .lore-name {
+      font-family: 'Cinzel', serif;
+      font-size: .72rem;
+      letter-spacing: .1em;
+      color: var(--crystal);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .lore-text {
+      font-size: .88rem;
+      font-style: italic;
+      color: rgba(226,224,240,.55);
+      line-height: 1.7;
+    }
+
+    /* ==============================
+       QUOTE BANNER
+    ============================== */
+    .quote-banner {
+      position: relative; z-index: 2;
+      padding: 60px 24px;
+      text-align: center;
+      overflow: hidden;
+    }
+    .quote-banner::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 70% 100% at 50% 50%, rgba(124,58,237,.12) 0%, transparent 70%),
+        linear-gradient(180deg, transparent, rgba(167,139,250,.04), transparent);
+      pointer-events: none;
+    }
+    .quote-inner {
+      position: relative; z-index: 1;
+      max-width: 680px; margin: 0 auto;
+    }
+    .quote-mark {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 5rem;
+      color: rgba(167,139,250,.15);
+      line-height: .6;
+      display: block;
+      margin-bottom: 8px;
+    }
+    blockquote {
+      font-family: 'EB Garamond', serif;
+      font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+      font-style: italic;
+      color: rgba(226,224,240,.85);
+      line-height: 1.8;
+      margin-bottom: 20px;
+    }
+    .quote-attr {
+      font-family: 'Cinzel', serif;
+      font-size: .68rem;
+      letter-spacing: .25em;
+      color: var(--gold);
+      text-transform: uppercase;
+    }
+
+    /* ==============================
+       REALMS SECTION
+    ============================== */
+    .realm-list {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    @media(max-width:860px){ .realm-list{grid-template-columns:repeat(2,1fr)} }
+    @media(max-width:500px){ .realm-list{grid-template-columns:1fr} }
+
+    .realm-item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--crystal2);
+      border-radius: 4px;
+      padding: 14px 18px;
+      transition: transform .2s, border-color .2s;
+    }
+    .realm-item:hover { transform: translateX(4px); border-left-color: var(--gold); }
+    .realm-item .realm-num {
+      font-family: 'Cinzel', serif;
+      font-size: .6rem;
+      color: var(--muted);
+      letter-spacing: .12em;
+      margin-bottom: 4px;
+    }
+    .realm-item .realm-name {
+      font-family: 'Cinzel', serif;
+      font-size: .8rem;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .realm-item .realm-guardian {
+      font-size: .78rem;
+      font-style: italic;
+      color: var(--muted);
+    }
+    .realm-item .realm-guardian span { color: var(--crystal); }
+
+    /* ==============================
+       FOOTER
+    ============================== */
+    footer {
+      position: relative; z-index: 2;
+      border-top: 1px solid var(--border);
+      padding: 40px 48px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 16px;
+    }
+    .footer-brand {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: .9rem;
+      color: var(--gold);
+    }
+    .footer-brand span { color: var(--crystal); }
+    .footer-nav {
+      display: flex; gap: 20px;
+      list-style: none;
+    }
+    .footer-nav a {
+      font-family: 'Cinzel', serif;
+      font-size: .65rem;
+      letter-spacing: .12em;
+      color: var(--muted);
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: color .2s;
+    }
+    .footer-nav a:hover { color: var(--crystal); }
+    .footer-copy {
+      font-size: .8rem;
+      font-style: italic;
+      color: var(--muted);
+    }
+
+    /* ==============================
+       SECTION SEPARATOR
+    ============================== */
+    .sep {
+      width: 100%; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      position: relative; z-index: 2;
+    }
+
+    /* ==============================
+       REVEAL ANIMATION
+    ============================== */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity .8s ease, transform .8s ease;
+    }
+    .reveal.vis { opacity: 1; transform: none; }
+    .reveal-delay-1 { transition-delay: .1s; }
+    .reveal-delay-2 { transition-delay: .2s; }
+    .reveal-delay-3 { transition-delay: .3s; }
+
+    /* ==============================
+       TOOLTIP / COMING SOON OVERLAY
+    ============================== */
+    .arc3-overlay {
+      position: absolute; inset: 0;
+      background: rgba(4,5,13,.65);
+      backdrop-filter: blur(3px);
+      z-index: 10;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 10px;
+      border-radius: 5px;
+    }
+    .arc3-overlay p {
+      font-family: 'Cinzel', serif;
+      font-size: .72rem;
+      letter-spacing: .2em;
+      color: var(--danger);
+      text-transform: uppercase;
+    }
+    .cs-dots {
+      display: flex; gap: 6px;
+    }
+    .cs-dot {
+      width: 6px; height: 6px;
+      background: var(--danger);
+      border-radius: 50%;
+      animation: cs-blink 1.4s ease-in-out infinite;
+    }
+    .cs-dot:nth-child(2) { animation-delay: .2s; }
+    .cs-dot:nth-child(3) { animation-delay: .4s; }
+    @keyframes cs-blink { 0%,100%{opacity:.2} 50%{opacity:1} }
+  </style>
+</head>
+<body>
+
+  <!-- CURSOR -->
+  <div id="cur-dot"></div>
+  <div id="cur-ring"></div>
+
+  <!-- STARFIELD -->
+  <canvas id="starfield"></canvas>
+
+  <!-- NAV -->
+  <nav>
+    <a href="story-hub.html" class="nav-brand">S·O·C</a>
+    <ul class="nav-links">
+      <li><a href="story-hub.html">Story Hub</a></li>
+      <li><a href="arc1-p1.html">Arc I</a></li>
+      <li><a href="arc2-p1.html">Arc II</a></li>
+      <li><a href="Azdar (2).html">← Beranda</a></li>
+    </ul>
+  </nav>
+
+  <div class="wrapper">
+
+    <!-- ====== HERO ====== -->
+    <section class="hero">
+      <div class="hero-glow"></div>
+
+      <!-- floating shards -->
+      <div class="shard" style="left:10%;top:60%;font-size:1.2rem;animation-duration:7s;animation-delay:0s">💎</div>
+      <div class="shard" style="left:85%;top:55%;font-size:.9rem;animation-duration:9s;animation-delay:2s">✦</div>
+      <div class="shard" style="left:20%;top:75%;font-size:.7rem;animation-duration:8s;animation-delay:1s">◆</div>
+      <div class="shard" style="left:70%;top:70%;font-size:1rem;animation-duration:10s;animation-delay:3s">💠</div>
+      <div class="shard" style="left:50%;top:80%;font-size:.8rem;animation-duration:6s;animation-delay:1.5s">✧</div>
+
+      <div class="hero-eyebrow">
+        <span class="eyebrow-line"></span>
+        Sebuah Kisah Kosmik
+        <span class="eyebrow-line r"></span>
+      </div>
+
+      <h1 class="hero-title">The Secret</h1>
+      <div class="title-sub">of Crystal</div>
+
+      <div class="hero-divider"></div>
+
+      <p class="hero-lore">
+        Di awal yang sunyi, sebelum cahaya mengenal nama,<br />
+        dua dewa lahir — dan dunia pun mulai bernapas.<br />
+        Kini kristal-kristal misterius menunggu untuk dibuka…
+      </p>
+
+      <a href="#arcs" class="hero-cta">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+        Mulai Menjelajah
+      </a>
+
+      <div class="scroll-hint">
+        <span>Gulir</span>
+        <div class="scroll-arrow"></div>
+      </div>
+    </section>
+
+    <!-- ====== QUOTE ====== -->
+    <div class="quote-banner">
+      <div class="quote-inner">
+        <span class="quote-mark">"</span>
+        <blockquote>
+          Kekuasaan tidak pernah dibagi.
+        </blockquote>
+        <p class="quote-attr">— The Mighty God · Arc I: The Living Realm</p>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- ====== ARC CARDS ====== -->
+    <section id="arcs">
+      <div class="section-inner">
+        <div class="section-label reveal">Pilih Perjalananmu</div>
+        <h2 class="section-title reveal reveal-delay-1">Tiga Arc Yang Baru saya kerjakan</h2>
+        <p class="section-desc reveal reveal-delay-2">
+          Setiap arc membawa kamu lebih dalam ke misteri kristal yang tertidur,
+          dari kelahiran alam semesta hingga manusia pertama yang menyentuh kekuatannya.
+        </p>
+
+        <div class="arcs-grid">
+
+          <!-- ARC 1 -->
+          <div class="arc-card arc1 reveal">
+            <div class="glow-strip"></div>
+            <div class="arc-visual">
+              <div class="arc-visual-bg"></div>
+              <div class="arc-num">Arc · I</div>
+              <span class="arc-status complete">Selesai</span>
+              <div class="arc-icon">🌌</div>
+            </div>
+            <div class="arc-body">
+              <div class="arc-title">The Living Realm</div>
+              <div class="arc-subtitle">Kelahiran Dunia</div>
+              <p class="arc-desc">
+                Sebelum cahaya mengenal nama — dua dewa tertinggi lahir,
+                membangun delapan alam, dan memulai perang kosmik pertama
+                yang memecah persaudaraan mereka untuk selamanya.
+              </p>
+              <div class="arc-footer">
+                <div class="arc-chapters"><span>5</span> Bagian</div>
+                <a href="arc1-p1.html" class="arc-btn">
+                  Baca
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- ARC 2 -->
+          <div class="arc-card arc2 reveal reveal-delay-1">
+            <div class="glow-strip"></div>
+            <div class="arc-visual">
+              <div class="arc-visual-bg"></div>
+              <div class="arc-num">Arc · II</div>
+              <span class="arc-status complete">Selesai</span>
+              <div class="arc-icon">⚔️</div>
+            </div>
+            <div class="arc-body">
+              <div class="arc-title">Ibza The First Crystal User</div>
+              <div class="arc-subtitle">Pengguna Kristal Pertama</div>
+              <p class="arc-desc">
+                Di planet Fearth, seorang panglima muda bernama Ibza
+                menemukan kristal murni dan harus menghadapi X —
+                makhluk yang lahir dari ketidakadilan sistem itu sendiri.
+              </p>
+              <div class="arc-footer">
+                <div class="arc-chapters"><span>5</span> Bagian</div>
+                <a href="arc2-p1.html" class="arc-btn">
+                  Baca
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- ARC 3 -->
+          <div class="arc-card arc3 reveal reveal-delay-2" style="position:relative">
+            <div class="arc3-overlay">
+              <div class="cs-dots">
+                <div class="cs-dot"></div>
+                <div class="cs-dot"></div>
+                <div class="cs-dot"></div>
+              </div>
+              <p>Segera Hadir</p>
+            </div>
+            <div class="glow-strip"></div>
+            <div class="arc-visual">
+              <div class="arc-visual-bg"></div>
+              <div class="arc-num">Arc · III</div>
+              <span class="arc-status soon">Belum Selesai</span>
+              <div class="arc-icon">🩸</div>
+            </div>
+            <div class="arc-body">
+              <div class="arc-title">Dark Zen</div>
+              <div class="arc-subtitle">Bayangan yang Hidup</div>
+              <p class="arc-desc">
+                Zen yang terbelah — entitas gelap yang lahir dari pengkhianatan —
+                kini bergerak dalam bayang-bayang, menunggu saat yang tepat
+                untuk membalikkan segalanya.
+              </p>
+              <div class="arc-footer">
+                <div class="arc-chapters"><span>—</span> Bagian</div>
+                <span class="arc-btn disabled">
+                  Coming Soon
+                </span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <div class="sep"></div>
+
+    <!-- ====== LORE WORLD ====== -->
+    <section>
+      <div class="section-inner">
+        <div class="section-label reveal">Dunia Cerita</div>
+        <h2 class="section-title reveal reveal-delay-1">Elemen Penting</h2>
+        <p class="section-desc reveal reveal-delay-2">
+          Kenali tokoh-tokoh dan kekuatan yang membentuk semesta
+          <em>The Secret of Crystal</em>.
+        </p>
+
+        <div class="lore-grid reveal">
+          <div class="lore-card">
+            <div class="lore-icon">👑</div>
+            <div class="lore-name">The Mighty God</div>
+            <p class="lore-text">Dewa pertama. Pencipta The Main Realm. Memegang kendali atas seluruh God Cosmic — namun ambisinya yang tak terbatas menghancurkan persaudaraan.</p>
+          </div>
+          <div class="lore-card">
+            <div class="lore-icon">🌑</div>
+            <div class="lore-name">The Worst God</div>
+            <p class="lore-text">Dewa kedua yang lebih terstruktur dan bijaksana. Dikurung di Underrealm setelah dikhianati — namun kebencian yang ditanamkan padanya takkan pernah padam.</p>
+          </div>
+          <div class="lore-card">
+            <div class="lore-icon">💎</div>
+            <div class="lore-name">Pure Crystal</div>
+            <p class="lore-text">Kristal murni yang memiliki kesadaran sendiri. Memilih penggunanya, bukan sebaliknya. Kekuatannya melampaui pemahaman alam biasa.</p>
+          </div>
+          <div class="lore-card">
+            <div class="lore-icon">🌀</div>
+            <div class="lore-name">Dark Zen</div>
+            <p class="lore-text">Separuh eksistensi Zen yang dipisahkan paksa oleh The Mighty God. Entitas gelap yang taat tanpa bertanya — senjata yang menunggu pemicunya.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="sep"></div>
+
+    <!-- ====== THE LIVING REALMS ====== -->
+    <section>
+      <div class="section-inner">
+        <div class="section-label reveal">Peta Semesta</div>
+        <h2 class="section-title reveal reveal-delay-1">The Living Realm</h2>
+        <p class="section-desc reveal reveal-delay-2">
+          Delapan alam utama yang dibangun oleh dua dewa —
+          masing-masing dijaga oleh Entity khusus.
+        </p>
+
+        <div class="realm-list reveal">
+          <div class="realm-item">
+            <div class="realm-num">Alam · 01</div>
+            <div class="realm-name">The Reality Realm</div>
+            <div class="realm-guardian">Dijaga oleh <span>Fersid</span></div>
+          </div>
+          <div class="realm-item">
+            <div class="realm-num">Alam · 02</div>
+            <div class="realm-name">The Timeline Realm</div>
+            <div class="realm-guardian">Dijaga oleh <span>Jovizet</span></div>
+          </div>
+          <div class="realm-item">
+            <div class="realm-num">Alam · 03</div>
+            <div class="realm-name">The Space Realm</div>
+            <div class="realm-guardian">Dijaga oleh <span>Spas</span></div>
+          </div>
+          <div class="realm-item">
+            <div class="realm-num">Alam · 04</div>
+            <div class="realm-name">The Power Realm</div>
+            <div class="realm-guardian">Dijaga oleh <span>Dragar</span></div>
+          </div>
+          <div class="realm-item">
+            <div class="realm-num">Alam · 05</div>
+            <div class="realm-name">The Soul Realm</div>
+            <div class="realm-guardian">Dijaga oleh <span>Stiva</span></div>
+          </div>
+          <div class="realm-item">
+            <div class="realm-num">Alam · 06</div>
+            <div class="realm-name">The Mind Realm</div>
+            <div class="realm-guardian">Dijaga oleh <span>Zapton</span></div>
+          </div>
+          <div class="realm-item">
+            <div class="realm-num">Alam · 07</div>
+            <div class="realm-name">The Fate Realm</div>
+            <div class="realm-guardian">Dijaga oleh <span>Wersteler &amp; Gita</span></div>
+          </div>
+          <div class="realm-item">
+            <div class="realm-num">Alam · 08</div>
+            <div class="realm-name">The Destiny Realm</div>
+            <div class="realm-guardian">Dijaga oleh <span>Pox</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="sep"></div>
+
+    <!-- FOOTER -->
+    <footer>
+      <div class="footer-brand">The Secret <span>of Crystal</span></div>
+      <ul class="footer-nav">
+        <li><a href="arc1-p1.html">Arc I</a></li>
+        <li><a href="arc2-p1.html">Arc II</a></li>
+        <li><a href="Azdar (2).html">Beranda</a></li>
+      </ul>
+      <p class="footer-copy"><em>Sebuah kisah tentang kekuasaan, pengkhianatan, dan kristal yang menentukan nasib.</em></p>
+    </footer>
+
+  </div><!-- /wrapper -->
+
+  <script>
+    /* ── Custom Cursor ── */
+    const dot  = document.getElementById('cur-dot');
+    const ring = document.getElementById('cur-ring');
+    let mx=0,my=0,rx=0,ry=0;
+    document.addEventListener('mousemove', e=>{
+      mx=e.clientX; my=e.clientY;
+      dot.style.left  = mx-3+'px';
+      dot.style.top   = my-3+'px';
+    });
+    (function animRing(){
+      rx += (mx-rx-14)*.1;
+      ry += (my-ry-14)*.1;
+      ring.style.left = rx+'px';
+      ring.style.top  = ry+'px';
+      requestAnimationFrame(animRing);
+    })();
+
+    /* ── Starfield ── */
+    const canvas = document.getElementById('starfield');
+    const ctx    = canvas.getContext('2d');
+    let W, H, stars=[];
+    function resize(){
+      W = canvas.width  = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+    function initStars(){
+      stars = Array.from({length:220}, ()=>({
+        x: Math.random()*W,
+        y: Math.random()*H,
+        r: Math.random()*1.2+.2,
+        a: Math.random(),
+        speed: Math.random()*.3+.05,
+        twinkle: Math.random()*Math.PI*2
+      }));
+    }
+    function drawStars(){
+      ctx.clearRect(0,0,W,H);
+      const t = Date.now()*.001;
+      stars.forEach(s=>{
+        const alpha = s.a * (.5 + .5*Math.sin(t*s.speed + s.twinkle));
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+        ctx.fillStyle = `rgba(226,224,240,${alpha})`;
+        ctx.fill();
+      });
+      requestAnimationFrame(drawStars);
+    }
+    resize(); initStars(); drawStars();
+    window.addEventListener('resize', ()=>{ resize(); initStars(); });
+
+    /* ── Scroll Reveal ── */
+    const obs = new IntersectionObserver(entries=>{
+      entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('vis'); obs.unobserve(e.target); } });
+    }, {threshold:.1});
+    document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+  </script>
+</body>
+</html>

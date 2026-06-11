@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Story Reader — The Secret of Crystal Universe</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet" />
+
+  <!-- Library pembaca PDF dan DOCX -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://unpkg.com/mammoth/mammoth.browser.min.js"></script>
+
+  <style>
+    :root {
+      --void:#04050d;
+      --deep:#07091a;
+      --card:#0e1228;
+      --border:#1c2150;
+      --crystal:#a78bfa;
+      --crystal2:#7c3aed;
+      --gold:#f5c842;
+      --gold2:#d4a017;
+      --ember:#ff6b35;
+      --danger:#f43f5e;
+      --text:#e8e0f8;
+      --muted:#6b5d94;
+      --soft:rgba(232,224,248,.76);
+    }
+
+    *,*::before,*::after {
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+    }
+
+    html {
+      scroll-behavior:smooth;
+    }
+
+    body {
+      background:var(--void);
+      color:var(--text);
+      font-family:'EB Garamond', Georgia, serif;
+      min-height:100vh;
+      overflow-x:hidden;
+      cursor:none;
+    }
+
+    #cur-dot {
+      width:6px;
+      height:6px;
+      background:var(--gold);
+      border-radius:50%;
+      position:fixed;
+      top:0;
+      left:0;
+      pointer-events:none;
+      z-index:9999;
+      box-shadow:0 0 10px var(--gold);
+    }
+
+    #cur-ring {
+      width:26px;
+      height:26px;
+      border:1px solid var(--crystal);
+      border-radius:50%;
+      position:fixed;
+      top:0;
+      left:0;
+      pointer-events:none;
+      z-index:9998;
+      opacity:.45;
+    }
+
+    #starfield {
+      position:fixed;
+      inset:0;
+      z-index:0;
+      pointer-events:none;
+    }
+
+    .ambient {
+      position:fixed;
+      inset:0;
+      z-index:0;
+      pointer-events:none;
+      background:radial-gradient(ellipse 50% 50% at 50% 30%,rgba(124,58,237,.1) 0%,transparent 70%);
+    }
+
+    nav {
+      position:fixed;
+      top:0;
+      left:0;
+      right:0;
+      z-index:100;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 40px;
+      height:60px;
+      background:rgba(4,5,13,.85);
+      backdrop-filter:blur(18px);
+      border-bottom:1px solid rgba(167,139,250,.1);
+    }
+
+    .nav-logo {
+      font-family:'Cinzel Decorative',serif;
+      font-size:.82rem;
+      color:var(--gold);
+      letter-spacing:.06em;
+      text-decoration:none;
+    }
+
+    .nav-back-link {
+      font-family:'Cinzel',serif;
+      font-size:.62rem;
+      letter-spacing:.15em;
+      color:var(--muted);
+      text-decoration:none;
+      text-transform:uppercase;
+      display:flex;
+      align-items:center;
+      gap:6px;
+      transition:color .2s;
+    }
+
+    .nav-back-link:hover {
+      color:var(--crystal);
+    }
+
+    #upload-screen {
+      position:relative;
+      z-index:2;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:80px 24px;
+    }
+
+    .upload-container {
+      max-width:580px;
+      width:100%;
+      text-align:center;
+    },
+
+    .upload-eyebrow {
+      font-family:'Cinzel',serif;
+      font-size:.68rem;
+      letter-spacing:.3em;
+      color:var(--gold);
+      text-transform:uppercase;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:12px;
+      margin-bottom:20px;
+      opacity:0;
+      animation:rise .8s .1s ease forwards;
+    }
+
+    .eyebrow-line {
+      width:36px;
+      height:1px;
+    }
+
+    .eyebrow-line.l {
+      background:linear-gradient(90deg,transparent,var(--gold));
+    }
+
+    .eyebrow-line.r {
+      background:linear-gradient(90deg,var(--gold),transparent);
+    }
+
+    .upload-title {
+      font-family:'Cinzel Decorative',serif;
+      font-size:clamp(1.6rem,5vw,3rem);
+      font-weight:900;
+      color:#fff;
+      margin-bottom:14px;
+      text-shadow:0 0 40px rgba(167,139,250,.4);
+      opacity:0;
+      animation:rise .8s .2s ease forwards;
+    }
+
+    .upload-sub {
+      font-size:1.05rem;
+      font-style:italic;
+      color:rgba(232,224,248,.6);
+      line-height:1.8;
+      margin-bottom:48px;
+      opacity:0;
+      animation:rise .8s .35s ease forwards;
+    }
+
+    .drop-zone {
+      position:relative;
+      border:1px dashed rgba(167,139,250,.35);
+      border-radius:10px;
+      padding:52px 36px;
+      background:rgba(14,18,40,.5);
+      backdrop-filter:blur(8px);
+      transition:all .3s;
+      cursor:none;
+      opacity:0;
+      animation:rise .8s .5s ease forwards;
+    }
+
+    .drop-zone.drag-over {
+      border-color:var(--crystal);
+      background:rgba(124,58,237,.1);
+      box-shadow:0 0 40px rgba(124,58,237,.15);
+    }
+
+    .drop-zone.has-file {
+      border-color:var(--gold2);
+      background:rgba(245,200,66,.04);
+    }
+
+    .dz-icon {
+      font-size:3.2rem;
+      margin-bottom:16px;
+      display:block;
+      filter:drop-shadow(0 0 12px rgba(167,139,250,.4));
+      transition:transform .3s;
+    }
+
+    .drop-zone:hover .dz-icon {
+      transform:translateY(-4px);
+    }
+
+    .dz-title {
+      font-family:'Cinzel',serif;
+      font-size:.8rem;
+      letter-spacing:.15em;
+      color:var(--text);
+      text-transform:uppercase;
+      margin-bottom:8px;
+    }
+
+    .dz-sub {
+      font-size:.9rem;
+      font-style:italic;
+      color:var(--muted);
+      margin-bottom:20px;
+    }
+
+    .dz-btn {
+      font-family:'Cinzel',serif;
+      font-size:.68rem;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color:var(--crystal);
+      border:1px solid rgba(167,139,250,.35);
+      padding:9px 22px;
+      border-radius:4px;
+      background:transparent;
+      cursor:none;
+      transition:all .25s;
+      display:inline-block;
+    }
+
+    .dz-btn:hover {
+      background:rgba(167,139,250,.08);
+      border-color:var(--crystal);
+    }
+
+    #file-input {
+      display:none;
+    }
+
+    .file-info {
+      display:none;
+      margin-top:16px;
+      font-family:'Cinzel',serif;
+      font-size:.68rem;
+      letter-spacing:.12em;
+      color:var(--gold);
+      text-transform:uppercase;
+    }
+
+    .options-row {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+      margin-top:20px;
+      text-align:left;
+      opacity:0;
+      animation:rise .8s .65s ease forwards;
+    }
+
+    @media(max-width:500px) {
+      .options-row {
+        grid-template-columns:1fr;
+      }
+    }
+
+    .option-group label {
+      font-family:'Cinzel',serif;
+      font-size:.6rem;
+      letter-spacing:.18em;
+      color:var(--crystal);
+      text-transform:uppercase;
+      display:block;
+      margin-bottom:7px;
+    }
+
+    .option-group select,
+    .option-group input[type="text"] {
+      width:100%;
+      background:rgba(255,255,255,.04);
+      border:1px solid var(--border);
+      border-radius:5px;
+      color:var(--text);
+      font-family:'EB Garamond',serif;
+      font-size:.9rem;
+      padding:9px 12px;
+      outline:none;
+      transition:border-color .2s;
+      cursor:none;
+    }
+
+    .option-group select:focus,
+    .option-group input:focus {
+      border-color:var(--crystal);
+      box-shadow:0 0 0 3px rgba(167,139,250,.1);
+    }
+
+    .option-group select option {
+      background:var(--deep);
+    }
+
+    .submit-btn {
+      width:100%;
+      margin-top:20px;
+      font-family:'Cinzel',serif;
+      font-size:.75rem;
+      letter-spacing:.22em;
+      text-transform:uppercase;
+      color:var(--void);
+      background:linear-gradient(135deg,var(--gold),var(--gold2));
+      border:none;
+      border-radius:5px;
+      padding:14px;
+      cursor:none;
+      transition:opacity .25s,transform .2s,box-shadow .25s;
+      box-shadow:0 0 24px rgba(245,200,66,.2);
+      opacity:0;
+      animation:rise .8s .8s ease forwards;
+    }
+
+    .submit-btn:hover {
+      opacity:.88;
+      transform:translateY(-2px);
+      box-shadow:0 0 40px rgba(245,200,66,.35);
+    }
+
+    .submit-btn:disabled {
+      opacity:.35;
+      transform:none;
+      cursor:not-allowed;
+    }
+
+    #loading-screen {
+      display:none;
+      position:relative;
+      z-index:2;
+      min-height:100vh;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      gap:24px;
+      text-align:center;
+      padding:24px;
+    }
+
+    #loading-screen.active {
+      display:flex;
+    }
+
+    .loading-crystal {
+      width:60px;
+      height:60px;
+      background:linear-gradient(135deg,#c4b5fd,#7c3aed,#4c1d95);
+      clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);
+      animation:crystalSpin 2s ease-in-out infinite,crystalGlow 2s ease-in-out infinite;
+    }
+
+    @keyframes crystalSpin {
+      0%,100% { transform:rotate(0deg); }
+      50% { transform:rotate(20deg); }
+    }
+
+    @keyframes crystalGlow {
+      0%,100% { box-shadow:0 0 20px rgba(167,139,250,.5); }
+      50% { box-shadow:0 0 50px rgba(167,139,250,.9); }
+    }
+
+    .loading-title {
+      font-family:'Cinzel',serif;
+      font-size:.75rem;
+      letter-spacing:.25em;
+      color:var(--crystal);
+      text-transform:uppercase;
+    }
+
+    .loading-msg {
+      font-size:.95rem;
+      font-style:italic;
+      color:var(--muted);
+      min-height:24px;
+      transition:opacity .3s;
+    }
+
+    .loading-bar-wrap {
+      width:260px;
+      height:2px;
+      background:var(--border);
+      border-radius:1px;
+      overflow:hidden;
+    }
+
+    .loading-bar {
+      height:100%;
+      background:linear-gradient(90deg,var(--crystal2),var(--crystal),var(--gold));
+      border-radius:1px;
+      width:0%;
+      transition:width .4s ease;
+    }
+
+    #reader-screen {
+      display:none;
+      position:relative;
+      z-index:2;
+    }
+
+    #reader-screen.active {
+      display:block;
+    }
+
+    .reader-nav {
+      position:fixed;
+      top:0;
+      left:0;
+      right:0;
+      z-index:100;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 40px;
+      height:60px;
+      background:rgba(4,5,13,.88);
+      backdrop-filter:blur(18px);
+      border-bottom:1px solid rgba(167,139,250,.12);
+    }
+
+    .reader-title-nav {
+      font-family:'Cinzel',serif;
+      font-size:.68rem;
+      letter-spacing:.15em;
+      color:var(--crystal);
+      text-transform:uppercase;
+      max-width:300px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+
+    .reader-progress {
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .r-dot {
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      border:1px solid var(--border);
+      background:transparent;
+      transition:all .3s;
+      cursor:none;
+    }
+
+    .r-dot.active {
+      background:var(--crystal);
+      border-color:var(--crystal);
+      box-shadow:0 0 8px var(--crystal);
+    }
+
+    .r-dot.done {
+      background:var(--gold2);
+      border-color:var(--gold);
+    }
+
+    .story-page {
+      display:none;
+      max-width:780px;
+      margin:0 auto;
+      padding:100px 24px 120px;
+      animation:pageIn .6s ease forwards;
+    }
+
+    .story-page.active {
+      display:block;
+    }
+
+    @keyframes pageIn {
+      from {
+        opacity:0;
+        transform:translateY(12px);
+      }
+      to {
+        opacity:1;
+        transform:translateY(0);
+      }
+    }
+
+    .pg-header {
+      text-align:center;
+      margin-bottom:56px;
+    }
+
+    .pg-arc {
+      font-family:'Cinzel',serif;
+      font-size:.65rem;
+      letter-spacing:.3em;
+      color:var(--gold);
+      text-transform:uppercase;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:12px;
+      margin-bottom:16px;
+    }
+
+    .pg-line {
+      width:44px;
+      height:1px;
+    }
+
+    .pg-line.l {
+      background:linear-gradient(90deg,transparent,var(--gold));
+    }
+
+    .pg-line.r {
+      background:linear-gradient(90deg,var(--gold),transparent);
+    }
+
+    .pg-num {
+      font-family:'Cinzel Decorative',serif;
+      font-size:clamp(2.2rem,5vw,4rem);
+      font-weight:900;
+      background:linear-gradient(135deg,#fff 0%,var(--crystal) 50%,var(--gold) 100%);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      background-clip:text;
+      line-height:1;
+      margin-bottom:14px;
+      filter:drop-shadow(0 0 24px rgba(167,139,250,.4));
+    }
+
+    .pg-title {
+      font-family:'Cinzel Decorative',serif;
+      font-size:clamp(.95rem,3vw,1.4rem);
+      color:#fff;
+      letter-spacing:.05em;
+      margin-bottom:8px;
+    }
+
+    .pg-subtitle {
+      font-family:'Cinzel',serif;
+      font-size:.7rem;
+      letter-spacing:.18em;
+      color:var(--crystal);
+      text-transform:uppercase;
+      margin-bottom:22px;
+    }
+
+    .pg-divider {
+      width:160px;
+      height:1px;
+      margin:0 auto;
+      background:linear-gradient(90deg,transparent,var(--crystal),var(--gold),var(--crystal),transparent);
+    }
+
+    .pg-body p {
+      font-size:clamp(1rem,2vw,1.14rem);
+      line-height:1.95;
+      color:var(--soft);
+      margin-bottom:26px;
+      text-align:justify;
+      hyphens:auto;
+    }
+
+    .pg-body p:first-child::first-letter {
+      font-family:'Cinzel Decorative',serif;
+      font-size:3.6rem;
+      font-weight:900;
+      float:left;
+      line-height:.8;
+      margin:4px 12px 0 0;
+      color:var(--gold);
+      text-shadow:0 0 20px rgba(245,200,66,.4);
+    }
+
+    .pg-body em {
+      color:var(--crystal);
+      font-style:italic;
+    }
+
+    .pg-body strong {
+      color:#fff;
+      font-weight:600;
+    }
+
+    .pg-body h3 {
+      font-family:'Cinzel',serif;
+      font-size:.78rem;
+      letter-spacing:.2em;
+      color:var(--gold);
+      text-transform:uppercase;
+      margin:36px 0 14px;
+      padding-bottom:8px;
+      border-bottom:1px solid var(--border);
+    }
+
+    .pg-body blockquote {
+      border-left:2px solid var(--crystal2);
+      padding:14px 0 14px 24px;
+      margin:28px 0;
+      font-style:italic;
+      color:rgba(232,224,248,.7);
+      font-size:1.05rem;
+      line-height:1.85;
+    }
+
+    .reader-footer {
+      position:fixed;
+      bottom:0;
+      left:0;
+      right:0;
+      z-index:100;
+      background:rgba(4,5,13,.92);
+      backdrop-filter:blur(16px);
+      border-top:1px solid rgba(167,139,250,.1);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 40px;
+      height:64px;
+    }
+
+    .r-btn {
+      font-family:'Cinzel',serif;
+      font-size:.66rem;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color:var(--muted);
+      border:1px solid var(--border);
+      padding:9px 20px;
+      border-radius:3px;
+      background:transparent;
+      cursor:none;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      transition:all .25s;
+    }
+
+    .r-btn:hover {
+      color:var(--crystal);
+      border-color:var(--crystal);
+      background:rgba(167,139,250,.05);
+    }
+
+    .r-btn.primary {
+      color:var(--gold);
+      border-color:var(--gold2);
+    }
+
+    .r-btn.primary:hover {
+      border-color:var(--gold);
+      background:rgba(245,200,66,.07);
+    }
+
+    .r-btn:disabled {
+      opacity:.3;
+      pointer-events:none;
+    }
+
+    .r-page-info {
+      font-family:'Cinzel',serif;
+      font-size:.62rem;
+      letter-spacing:.2em;
+      color:var(--muted);
+      text-transform:uppercase;
+    }
+
+    .r-page-info span {
+      color:var(--crystal);
+    }
+
+    .new-upload-btn {
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      margin:0 auto 20px;
+      font-family:'Cinzel',serif;
+      font-size:.62rem;
+      letter-spacing:.15em;
+      text-transform:uppercase;
+      color:var(--muted);
+      border:1px solid var(--border);
+      padding:7px 16px;
+      border-radius:3px;
+      background:transparent;
+      cursor:none;
+      transition:all .25s;
+      width:fit-content;
+    }
+
+    .new-upload-btn:hover {
+      color:var(--crystal);
+      border-color:var(--crystal);
+    }
+
+    .toast {
+      position:fixed;
+      bottom:80px;
+      left:50%;
+      transform:translateX(-50%);
+      background:rgba(244,63,94,.12);
+      border:1px solid rgba(244,63,94,.3);
+      border-radius:5px;
+      padding:10px 20px;
+      font-family:'Cinzel',serif;
+      font-size:.65rem;
+      letter-spacing:.12em;
+      color:var(--danger);
+      text-transform:uppercase;
+      z-index:999;
+      opacity:0;
+      transition:opacity .3s;
+      pointer-events:none;
+      text-align:center;
+    }
+
+    .toast.show {
+      opacity:1;
+    }
+
+    @keyframes rise {
+      from {
+        opacity:0;
+        transform:translateY(16px);
+      }
+      to {
+        opacity:1;
+        transform:translateY(0);
+      }
+    }
+
+    @media(max-width:720px) {
+      nav,
+      .reader-nav,
+      .reader-footer {
+        padding-left:18px;
+        padding-right:18px;
+      }
+
+      .reader-progress {
+        display:none;
+      }
+
+      .r-btn {
+        padding:8px 12px;
+        font-size:.58rem;
+      }
+
+      .r-page-info {
+        font-size:.56rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="cur-dot"></div>
+  <div id="cur-ring"></div>
+  <canvas id="starfield"></canvas>
+  <div class="ambient"></div>
+  <div class="toast" id="toast"></div>
+
+  <nav id="main-nav">
+    <a href="story-hub.html" class="nav-logo">S·O·C Universe</a>
+    <a href="story-hub.html" class="nav-back-link">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M19 12H5M12 5l-7 7 7 7"/>
+      </svg>
+      Story Hub
+    </a>
+  </nav>
+
+  <section id="upload-screen">
+    <div class="upload-container">
+      <div class="upload-eyebrow">
+        <span class="eyebrow-line l"></span>
+        Story Reader
+        <span class="eyebrow-line r"></span>
+      </div>
+
+      <h1 class="upload-title">Upload Ceritamu</h1>
+
+      <p class="upload-sub">
+        Unggah file PDF atau Word. Setelah file terbaca, cerita akan langsung
+        dibentuk menjadi halaman-halaman buku.
+      </p>
+
+      <div class="drop-zone" id="drop-zone">
+        <span class="dz-icon" id="dz-icon">📄</span>
+        <div class="dz-title" id="dz-title">Letakkan PDF atau Word di sini</div>
+        <div class="dz-sub" id="dz-sub">atau klik tombol di bawah untuk memilih file</div>
+
+        <button class="dz-btn" type="button" onclick="document.getElementById('file-input').click()">
+          Pilih File PDF / Word
+        </button>
+
+        <input
+          type="file"
+          id="file-input"
+          accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        />
+
+        <div class="file-info" id="file-info"></div>
+      </div>
+
+      <div class="options-row">
+        <div class="option-group">
+          <label>Judul Cerita (opsional)</label>
+          <input type="text" id="opt-title" placeholder="Biarkan kosong untuk otomatis" />
+        </div>
+
+        <div class="option-group">
+          <label>Jumlah Halaman</label>
+          <select id="opt-pages">
+            <option value="3">3 Halaman</option>
+            <option value="5" selected>5 Halaman</option>
+            <option value="7">7 Halaman</option>
+            <option value="10">10 Halaman</option>
+          </select>
+        </div>
+
+        <div class="option-group">
+          <label>Bahasa Output</label>
+          <select id="opt-lang">
+            <option value="id" selected>Bahasa Indonesia</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+
+        <div class="option-group">
+          <label>Tema Warna</label>
+          <select id="opt-theme">
+            <option value="crystal">Crystal (Ungu)</option>
+            <option value="ember">Ember (Oranye)</option>
+            <option value="ice">Ice (Biru)</option>
+            <option value="gold">Gold (Emas)</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="submit-btn" id="submit-btn" type="button" onclick="processStory()" disabled>
+        ✦ &nbsp; Buat Tampilan Cerita &nbsp; ✦
+      </button>
+    </div>
+  </section>
+
+  <section id="loading-screen">
+    <div class="loading-crystal"></div>
+    <div class="loading-title">Memproses Ceritamu</div>
+    <div class="loading-msg" id="loading-msg">Membaca isi file...</div>
+    <div class="loading-bar-wrap">
+      <div class="loading-bar" id="loading-bar"></div>
+    </div>
+  </section>
+
+  <section id="reader-screen">
+    <nav class="reader-nav" id="reader-nav" style="display:none">
+      <button class="r-btn" type="button" onclick="backToUpload()">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M19 12H5M12 5l-7 7 7 7"/>
+        </svg>
+        Ganti File
+      </button>
+
+      <div class="reader-title-nav" id="reader-title-nav">Judul Cerita</div>
+      <div class="reader-progress" id="reader-progress"></div>
+    </nav>
+
+    <div id="pages-container"></div>
+
+    <div class="reader-footer" id="reader-footer" style="display:none">
+      <button class="r-btn" id="btn-prev" type="button" onclick="changePage(-1)" disabled>
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M19 12H5M12 5l-7 7 7 7"/>
+        </svg>
+        Kembali
+      </button>
+
+      <div class="r-page-info">
+        Halaman <span id="current-page-display">1</span> / <span id="total-page-display">5</span>
+      </div>
+
+      <button class="r-btn primary" id="btn-next" type="button" onclick="changePage(1)">
+        Lanjut
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </button>
+    </div>
+  </section>
+
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    const dot = document.getElementById('cur-dot');
+    const ring = document.getElementById('cur-ring');
+
+    let mx = 0;
+    let my = 0;
+    let rx = 0;
+    let ry = 0;
+
+    document.addEventListener('mousemove', e => {
+      mx = e.clientX;
+      my = e.clientY;
+      dot.style.left = mx - 3 + 'px';
+      dot.style.top = my - 3 + 'px';
+    });
+
+    function cursorLoop() {
+      rx += (mx - rx - 13) * .1;
+      ry += (my - ry - 13) * .1;
+      ring.style.left = rx + 'px';
+      ring.style.top = ry + 'px';
+      requestAnimationFrame(cursorLoop);
+    }
+
+    cursorLoop();
+
+    const cv = document.getElementById('starfield');
+    const ctx = cv.getContext('2d');
+
+    let W;
+    let H;
+    let stars = [];
+
+    function resize() {
+      W = cv.width = innerWidth;
+      H = cv.height = innerHeight;
+    }
+
+    function initStars() {
+      stars = Array.from({ length:180 }, () => ({
+        x:Math.random() * W,
+        y:Math.random() * H,
+        r:Math.random() * 1.1 + .2,
+        a:Math.random(),
+        sp:Math.random() * .25 + .04,
+        tw:Math.random() * Math.PI * 2,
+        purple:Math.random() < .12,
+        gold:Math.random() < .05
+      }));
+    }
+
+    function drawStars() {
+      ctx.clearRect(0,0,W,H);
+      const t = Date.now() * .001;
+
+      stars.forEach(s => {
+        const a = s.a * (.4 + .6 * Math.sin(t * s.sp + s.tw));
+        ctx.beginPath();
+        ctx.arc(s.x,s.y,s.r,0,Math.PI * 2);
+        ctx.fillStyle = s.gold
+          ? `rgba(245,200,66,${a * .7})`
+          : s.purple
+            ? `rgba(167,139,250,${a * .8})`
+            : `rgba(232,224,248,${a * .55})`;
+        ctx.fill();
+      });
+
+      requestAnimationFrame(drawStars);
+    }
+
+    resize();
+    initStars();
+    drawStars();
+
+    window.addEventListener('resize', () => {
+      resize();
+      initStars();
+    });
+
+    let uploadedText = '';
+    let uploadedFileName = '';
+    let currentPage = 0;
+    let totalPages = 0;
+    let pages = [];
+
+    const fileInput = document.getElementById('file-input');
+    const dropZone = document.getElementById('drop-zone');
+    const submitBtn = document.getElementById('submit-btn');
+
+    fileInput.addEventListener('change', e => {
+      if (e.target.files[0]) handleFile(e.target.files[0]);
+    });
+
+    dropZone.addEventListener('dragover', e => {
+      e.preventDefault();
+      dropZone.classList.add('drag-over');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('drag-over');
+    });
+
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropZone.classList.remove('drag-over');
+
+      const file = e.dataTransfer.files[0];
+
+      if (!file) return;
+
+      if (isAcceptedFile(file)) {
+        handleFile(file);
+      } else {
+        showToast('Hanya file PDF atau DOCX yang diterima!');
+      }
+    });
+
+    function isAcceptedFile(file) {
+      const name = file.name.toLowerCase();
+      return name.endsWith('.pdf') || name.endsWith('.docx');
+    }
+
+    async function handleFile(file) {
+      if (!isAcceptedFile(file)) {
+        showToast('Hanya file PDF atau DOCX yang diterima!');
+        return;
+      }
+
+      if (file.size > 20 * 1024 * 1024) {
+        showToast('File terlalu besar! Maksimal 20MB');
+        return;
+      }
+
+      try {
+        submitBtn.disabled = true;
+        uploadedFileName = file.name;
+
+        dropZone.classList.remove('has-file');
+        document.getElementById('dz-icon').textContent = '⏳';
+        document.getElementById('dz-title').textContent = 'Membaca file...';
+        document.getElementById('dz-sub').textContent = 'Mohon tunggu sebentar';
+
+        uploadedText = await extractTextFromFile(file);
+
+        if (!uploadedText || uploadedText.trim().length < 20) {
+          throw new Error('Isi file tidak terbaca atau terlalu pendek.');
+        }
+
+        dropZone.classList.add('has-file');
+
+        document.getElementById('dz-icon').textContent = '✅';
+        document.getElementById('dz-title').textContent = file.name;
+        document.getElementById('dz-sub').textContent =
+          `${(file.size / 1024).toFixed(0)} KB · Siap dibentuk menjadi halaman`;
+
+        const fileInfo = document.getElementById('file-info');
+        fileInfo.style.display = 'block';
+        fileInfo.textContent = '📎 ' + file.name;
+
+        submitBtn.disabled = false;
+
+        processStory();
+      } catch (err) {
+        uploadedText = '';
+        uploadedFileName = '';
+
+        document.getElementById('dz-icon').textContent = '📄';
+        document.getElementById('dz-title').textContent = 'Letakkan PDF atau Word di sini';
+        document.getElementById('dz-sub').textContent = 'atau klik tombol di bawah untuk memilih file';
+
+        showToast(err.message || 'Gagal membaca file.');
+        console.error(err);
+      }
+    }
+
+    async function extractTextFromFile(file) {
+      const name = file.name.toLowerCase();
+      const buffer = await file.arrayBuffer();
+
+      if (name.endsWith('.pdf')) {
+        return extractTextFromPdf(buffer);
+      }
+
+      if (name.endsWith('.docx')) {
+        return extractTextFromDocx(buffer);
+      }
+
+      throw new Error('Format file tidak didukung.');
+    }
+
+    async function extractTextFromPdf(buffer) {
+      const pdf = await pdfjsLib.getDocument({ data:buffer }).promise;
+      const pageTexts = [];
+
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        const text = content.items.map(item => item.str).join(' ');
+        pageTexts.push(text);
+      }
+
+      return cleanText(pageTexts.join('\n\n'));
+    }
+
+    async function extractTextFromDocx(buffer) {
+      const result = await mammoth.extractRawText({ arrayBuffer:buffer });
+      return cleanText(result.value);
+    }
+
+    function cleanText(text) {
+      return String(text)
+        .replace(/\r/g,'')
+        .replace(/[ \t]+/g,' ')
+        .replace(/\n{3,}/g,'\n\n')
+        .trim();
+    }
+
+    const themes = {
+      crystal:{ accent:'#a78bfa', accent2:'#7c3aed', glow:'rgba(124,58,237,.4)' },
+      ember:{ accent:'#ff9f1c', accent2:'#ff6b35', glow:'rgba(255,159,28,.4)' },
+      ice:{ accent:'#93c5fd', accent2:'#3b82f6', glow:'rgba(147,197,253,.4)' },
+      gold:{ accent:'#f5c842', accent2:'#d4a017', glow:'rgba(245,200,66,.4)' }
+    };
+
+    async function processStory() {
+      if (!uploadedText) {
+        showToast('Pilih file PDF atau Word terlebih dahulu!');
+        return;
+      }
+
+      const nPages = parseInt(document.getElementById('opt-pages').value, 10);
+      const titleInput = document.getElementById('opt-title').value.trim();
+      const theme = document.getElementById('opt-theme').value;
+
+      document.getElementById('upload-screen').style.display = 'none';
+      document.getElementById('main-nav').style.display = 'none';
+
+      const loadingScreen = document.getElementById('loading-screen');
+      const loadingBar = document.getElementById('loading-bar');
+      const loadingMsg = document.getElementById('loading-msg');
+
+      loadingScreen.classList.add('active');
+      loadingBar.style.width = '20%';
+      loadingMsg.textContent = 'Membaca isi file...';
+
+      setTimeout(() => {
+        loadingBar.style.width = '55%';
+        loadingMsg.textContent = 'Membagi cerita menjadi halaman...';
+      }, 300);
+
+      setTimeout(() => {
+        loadingBar.style.width = '82%';
+        loadingMsg.textContent = 'Memformat tampilan cerita...';
+      }, 650);
+
+      setTimeout(() => {
+        const story = buildStoryFromText(uploadedText, {
+          title:titleInput || guessTitle(uploadedFileName, uploadedText),
+          nPages
+        });
+
+        loadingBar.style.width = '100%';
+        loadingMsg.textContent = 'Selesai!';
+
+        setTimeout(() => {
+          loadingScreen.classList.remove('active');
+          renderReader(story, theme);
+        }, 500);
+      }, 1000);
+    }
+
+    function buildStoryFromText(text, options) {
+      const chunks = splitTextIntoPages(text, options.nPages);
+
+      return {
+        title:options.title,
+        author:'',
+        pages:chunks.map((chunk, index) => ({
+          pageNum:`Bagian ${toRoman(index + 1)}`,
+          title:makePageTitle(index, chunks.length),
+          subtitle:`Halaman ${index + 1} dari ${chunks.length}`,
+          content:textToHtml(chunk)
+        }))
+      };
+    }
+
+    function splitTextIntoPages(text, count) {
+      let paragraphs = text
+        .split(/\n\s*\n/)
+        .map(p => p.trim())
+        .filter(Boolean);
+
+      if (paragraphs.length <= 1) {
+        paragraphs = splitLongTextIntoParagraphs(text);
+      }
+
+      const totalLength = paragraphs.reduce((sum, p) => sum + p.length, 0);
+      const targetLength = Math.max(1, Math.ceil(totalLength / count));
+
+      const result = [];
+      let current = [];
+      let currentLength = 0;
+
+      paragraphs.forEach(paragraph => {
+        if (
+          result.length < count - 1 &&
+          current.length &&
+          currentLength >= targetLength
+        ) {
+          result.push(current.join('\n\n'));
+          current = [];
+          currentLength = 0;
+        }
+
+        current.push(paragraph);
+        currentLength += paragraph.length;
+      });
+
+      if (current.length) {
+        result.push(current.join('\n\n'));
+      }
+
+      while (result.length < count) {
+        result.push('');
+      }
+
+      return result.slice(0, count);
+    }
+
+    function splitLongTextIntoParagraphs(text) {
+      const sentences = String(text)
+        .replace(/\s+/g,' ')
+        .split(/(?<=[.!?])\s+/)
+        .map(s => s.trim())
+        .filter(Boolean);
+
+      const paragraphs = [];
+      let current = [];
+
+      sentences.forEach(sentence => {
+        current.push(sentence);
+
+        if (current.join(' ').length > 550) {
+          paragraphs.push(current.join(' '));
+          current = [];
+        }
+      });
+
+      if (current.length) {
+        paragraphs.push(current.join(' '));
+      }
+
+      return paragraphs;
+    }
+
+    function textToHtml(text) {
+      if (!text.trim()) {
+        return '<p>Halaman ini belum memiliki isi cerita.</p>';
+      }
+
+      return text
+        .split(/\n\s*\n/)
+        .map(paragraph => {
+          const trimmed = paragraph.trim();
+          const safe = escHtml(trimmed);
+
+          if (isDialogue(trimmed)) {
+            return `<blockquote>${safe}</blockquote>`;
+          }
+
+          return `<p>${safe}</p>`;
+        })
+        .join('');
+    }
+
+    function isDialogue(text) {
+      const trimmed = text.trim().toLowerCase();
+
+      return /^["“'‘]/.test(trimmed) ||
+        trimmed.includes(' berkata') ||
+        trimmed.includes(' tanya') ||
+        trimmed.includes(' jawab') ||
+        trimmed.includes(' seru') ||
+        trimmed.includes(' bisik');
+    }
+
+    function guessTitle(fileName, text) {
+      const firstLine = text
+        .split('\n')
+        .map(line => line.trim())
+        .find(line => line && line.length <= 80);
+
+      if (firstLine) {
+        return firstLine;
+      }
+
+      return fileName
+        .replace(/\.(pdf|docx)$/i,'')
+        .replace(/[-_]/g,' ')
+        .trim() || 'Ceritamu';
+    }
+
+    function makePageTitle(index, total) {
+      if (index === 0) return 'Awal Kisah';
+      if (index === total - 1) return 'Akhir Perjalanan';
+      return 'Lanjutan Cerita';
+    }
+
+    function toRoman(num) {
+      const romans = ['I','II','III','IV','V','VI','VII','VIII','IX','X'];
+      return romans[num - 1] || String(num);
+    }
+
+    function renderReader(story, theme) {
+      const selectedTheme = themes[theme] || themes.crystal;
+
+      pages = story.pages || [];
+      totalPages = pages.length;
+      currentPage = 0;
+
+      document.documentElement.style.setProperty('--crystal', selectedTheme.accent);
+      document.documentElement.style.setProperty('--crystal2', selectedTheme.accent2);
+
+      document.getElementById('reader-title-nav').textContent = story.title || 'Ceritamu';
+
+      const progressWrap = document.getElementById('reader-progress');
+      progressWrap.innerHTML = '';
+
+      pages.forEach((_, i) => {
+        const dot = document.createElement('div');
+        dot.className = 'r-dot' + (i === 0 ? ' active' : '');
+        dot.id = `dot-${i}`;
+        dot.title = `Halaman ${i + 1}`;
+        dot.onclick = () => goToPage(i);
+        progressWrap.appendChild(dot);
+      });
+
+      const container = document.getElementById('pages-container');
+      container.innerHTML = '';
+
+      pages.forEach((page, i) => {
+        const div = document.createElement('div');
+
+        div.className = 'story-page' + (i === 0 ? ' active' : '');
+        div.id = `page-${i}`;
+
+        div.innerHTML = `
+          <div class="pg-header">
+            <div class="pg-arc">
+              <span class="pg-line l"></span>
+              ${escHtml(story.title || 'Cerita')}
+              <span class="pg-line r"></span>
+            </div>
+
+            <div class="pg-num">${escHtml(page.pageNum || ('Bagian ' + (i + 1)))}</div>
+            <div class="pg-title">${escHtml(page.title || '')}</div>
+            ${page.subtitle ? `<div class="pg-subtitle">${escHtml(page.subtitle)}</div>` : ''}
+            <div class="pg-divider"></div>
+          </div>
+
+          <div class="pg-body">${page.content || ''}</div>
+
+          ${i < pages.length - 1 ? '' : `
+            <div style="text-align:center;margin-top:56px;padding:36px 28px;background:rgba(124,58,237,.06);border:1px solid rgba(167,139,250,.14);border-radius:6px;">
+              <div style="font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.3em;color:var(--gold);text-transform:uppercase;margin-bottom:14px;">✦ Akhir Cerita ✦</div>
+
+              <p style="font-style:italic;color:rgba(232,224,248,.6);line-height:1.9;">
+                ${story.author ? `Karya: <em>${escHtml(story.author)}</em><br/>` : ''}
+                Ditampilkan oleh <em>S·O·C Story Reader</em>
+              </p>
+
+              <button class="new-upload-btn" type="button" onclick="backToUpload()" style="margin-top:20px">
+                ↑ Upload Cerita Lain
+              </button>
+            </div>
+          `}
+        `;
+
+        container.appendChild(div);
+      });
+
+      document.getElementById('total-page-display').textContent = totalPages;
+      document.getElementById('current-page-display').textContent = '1';
+      document.getElementById('btn-prev').disabled = true;
+      document.getElementById('btn-next').disabled = totalPages <= 1;
+
+      document.getElementById('reader-screen').classList.add('active');
+      document.getElementById('reader-nav').style.display = 'flex';
+      document.getElementById('reader-footer').style.display = 'flex';
+
+      window.scrollTo({ top:0, behavior:'smooth' });
+    }
+
+    function goToPage(n) {
+      document.getElementById(`page-${currentPage}`)?.classList.remove('active');
+      document.getElementById(`dot-${currentPage}`)?.classList.remove('active');
+
+      if (currentPage < n) {
+        document.getElementById(`dot-${currentPage}`)?.classList.add('done');
+      } else {
+        document.getElementById(`dot-${currentPage}`)?.classList.remove('done');
+      }
+
+      currentPage = n;
+
+      const page = document.getElementById(`page-${currentPage}`);
+
+      if (page) {
+        page.classList.add('active');
+        page.scrollIntoView({ behavior:'smooth', block:'start' });
+      }
+
+      document.getElementById(`dot-${currentPage}`)?.classList.add('active');
+      document.getElementById('current-page-display').textContent = currentPage + 1;
+      document.getElementById('btn-prev').disabled = currentPage === 0;
+      document.getElementById('btn-next').disabled = currentPage === totalPages - 1;
+
+      window.scrollTo({ top:0, behavior:'smooth' });
+    }
+
+    function changePage(dir) {
+      const next = currentPage + dir;
+
+      if (next >= 0 && next < totalPages) {
+        goToPage(next);
+      }
+    }
+
+    document.addEventListener('keydown', e => {
+      if (document.getElementById('reader-screen').classList.contains('active')) {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') changePage(1);
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') changePage(-1);
+      }
+    });
+
+    function backToUpload() {
+      document.getElementById('reader-screen').classList.remove('active');
+      document.getElementById('reader-nav').style.display = 'none';
+      document.getElementById('reader-footer').style.display = 'none';
+      document.getElementById('upload-screen').style.display = 'flex';
+      document.getElementById('main-nav').style.display = 'flex';
+
+      uploadedText = '';
+      uploadedFileName = '';
+      pages = [];
+      currentPage = 0;
+      totalPages = 0;
+
+      document.getElementById('file-input').value = '';
+      document.getElementById('dz-icon').textContent = '📄';
+      document.getElementById('dz-title').textContent = 'Letakkan PDF atau Word di sini';
+      document.getElementById('dz-sub').textContent = 'atau klik tombol di bawah untuk memilih file';
+      document.getElementById('file-info').style.display = 'none';
+      document.getElementById('opt-title').value = '';
+
+      submitBtn.disabled = true;
+      dropZone.classList.remove('has-file','drag-over');
+
+      document.documentElement.style.removeProperty('--crystal');
+      document.documentElement.style.removeProperty('--crystal2');
+
+      window.scrollTo({ top:0, behavior:'smooth' });
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+
+      toast.textContent = msg;
+      toast.classList.add('show');
+
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3500);
+    }
+
+    function escHtml(str) {
+      return String(str)
+        .replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;')
+        .replace(/'/g,'&#039;');
+    }
+  </script>
+</body>
+</html>

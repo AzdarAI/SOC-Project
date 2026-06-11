@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arc II — Akhir yang Pahit | The Secret of Crystal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+      --void:#04050d;--deep:#0a0800;--card:#100d14;--border:#1e1428;
+      --gold:#f5c842;--gold2:#d4a017;--amber:#ff9f1c;--ember:#ff6b35;
+      --danger:#f43f5e;--crystal:#a78bfa;--crystal2:#7c3aed;
+      --text:#f0ead0;--muted:#7a6a45;--soft:rgba(240,234,208,.75);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{background:var(--void);color:var(--text);font-family:'EB Garamond',Georgia,serif;min-height:100vh;overflow-x:hidden;cursor:none;}
+
+    /* cursor — ungu gelap untuk akhir yang kelam */
+    #cur-dot{width:6px;height:6px;background:var(--crystal);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9999;box-shadow:0 0 12px var(--crystal),0 0 24px var(--crystal2);}
+    #cur-ring{width:28px;height:28px;border:1px solid var(--crystal2);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9998;opacity:.4;}
+    #starfield{position:fixed;inset:0;z-index:0;pointer-events:none;}
+    .ambient{position:fixed;inset:0;z-index:0;pointer-events:none;
+      background:
+        radial-gradient(ellipse 60% 60% at 30% 40%,rgba(124,58,237,.1) 0%,transparent 70%),
+        radial-gradient(ellipse 40% 50% at 75% 70%,rgba(244,63,94,.05) 0%,transparent 60%);}
+
+    /* NAV */
+    nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:60px;background:rgba(4,3,0,.88);backdrop-filter:blur(16px);border-bottom:1px solid rgba(167,139,250,.1);}
+    .nav-left{display:flex;align-items:center;gap:16px;}
+    .nav-back{font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.15em;color:var(--muted);text-decoration:none;text-transform:uppercase;display:flex;align-items:center;gap:6px;transition:color .2s;}
+    .nav-back:hover{color:var(--crystal);}
+    .nav-sep{width:1px;height:18px;background:var(--border);}
+    .nav-arc{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.2em;color:var(--crystal);text-transform:uppercase;}
+    .nav-progress{display:flex;align-items:center;gap:8px;}
+    .prog-dot{width:8px;height:8px;border-radius:50%;border:1px solid var(--border);transition:all .3s;position:relative;}
+    .prog-dot a{display:block;width:100%;height:100%;border-radius:50%;}
+    .prog-dot.active{background:var(--crystal);border-color:var(--crystal);box-shadow:0 0 10px var(--crystal);}
+    .prog-dot.done{background:var(--gold2);border-color:var(--gold);}
+
+    /* LAYOUT */
+    .page{position:relative;z-index:2;max-width:780px;margin:0 auto;padding:110px 24px 140px;}
+
+    /* HEADER */
+    .chapter-header{text-align:center;margin-bottom:64px;opacity:0;animation:rise .9s .1s ease forwards;}
+    .ch-arc{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.35em;color:var(--gold);text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:18px;}
+    .ch-line{width:50px;height:1px;}
+    .ch-line.l{background:linear-gradient(90deg,transparent,var(--gold));}
+    .ch-line.r{background:linear-gradient(90deg,var(--gold),transparent);}
+    .chapter-num{font-family:'Cinzel Decorative',serif;font-size:clamp(2.5rem,6vw,4.5rem);font-weight:900;background:linear-gradient(135deg,var(--crystal) 0%,#fff 40%,var(--gold) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;margin-bottom:16px;filter:drop-shadow(0 0 30px rgba(167,139,250,.5));}
+    .chapter-title{font-family:'Cinzel Decorative',serif;font-size:clamp(1rem,3vw,1.5rem);color:#fff;letter-spacing:.06em;margin-bottom:10px;}
+    .chapter-subtitle{font-family:'Cinzel',serif;font-size:.75rem;letter-spacing:.2em;color:var(--crystal);text-transform:uppercase;margin-bottom:24px;}
+    .ch-divider{width:180px;height:1px;margin:0 auto;background:linear-gradient(90deg,transparent,var(--crystal),var(--danger),var(--crystal),transparent);}
+
+    /* STORY */
+    .story{opacity:0;animation:rise .9s .4s ease forwards;}
+
+    .opening-quote{border-left:2px solid var(--crystal2);padding:20px 0 20px 28px;margin-bottom:48px;position:relative;}
+    .opening-quote::before{content:'"';position:absolute;left:-2px;top:-10px;font-family:'Cinzel Decorative',serif;font-size:3rem;color:rgba(167,139,250,.2);line-height:1;}
+    .opening-quote p{font-size:clamp(1rem,2.5vw,1.2rem);font-style:italic;color:rgba(240,234,208,.85);line-height:1.9;}
+    .opening-quote cite{display:block;margin-top:12px;font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.2em;color:var(--crystal);text-transform:uppercase;}
+
+    .prose p{font-size:clamp(1rem,2vw,1.15rem);line-height:1.95;color:var(--soft);margin-bottom:28px;text-align:justify;hyphens:auto;}
+    .prose p:first-child::first-letter{font-family:'Cinzel Decorative',serif;font-size:3.8rem;font-weight:900;float:left;line-height:.8;margin:4px 12px 0 0;color:var(--crystal);text-shadow:0 0 20px rgba(167,139,250,.6);}
+    .prose em{color:var(--gold);font-style:italic;}
+    .prose strong{color:#fff;font-weight:600;}
+
+    .story-break{display:flex;align-items:center;justify-content:center;gap:12px;margin:48px 0;font-size:.75rem;color:var(--muted);}
+    .story-break::before,.story-break::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);}
+
+    /* Lore boxes */
+    .lore-box{border-radius:4px;padding:20px 24px;margin:32px 0;}
+    .lore-box.crystal{background:rgba(124,58,237,.06);border:1px solid rgba(167,139,250,.2);border-left:3px solid var(--crystal);}
+    .lore-box.danger{background:rgba(244,63,94,.05);border:1px solid rgba(244,63,94,.2);border-left:3px solid var(--danger);}
+    .lore-box.dark{background:rgba(0,0,0,.35);border:1px solid rgba(167,139,250,.1);border-left:3px solid var(--crystal2);}
+    .lore-box .lore-label{font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;margin-bottom:10px;}
+    .lore-box.crystal .lore-label{color:var(--crystal);}
+    .lore-box.danger .lore-label{color:var(--danger);}
+    .lore-box.dark .lore-label{color:var(--crystal2);}
+    .lore-box p{font-size:.95rem;font-style:italic;color:rgba(240,234,208,.65);line-height:1.75;margin:0;}
+
+    /* Binary code block */
+    .binary-block{background:rgba(0,0,0,.5);border:1px solid rgba(167,139,250,.15);border-radius:5px;padding:18px 20px;margin:24px 0;overflow-x:auto;}
+    .binary-label{font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:.2em;color:var(--crystal);text-transform:uppercase;margin-bottom:10px;}
+    .binary-text{font-family:'Courier New',monospace;font-size:.72rem;color:rgba(167,139,250,.5);line-height:1.8;word-break:break-all;}
+    .binary-translation{margin-top:10px;font-family:'EB Garamond',serif;font-size:.9rem;font-style:italic;color:rgba(240,234,208,.55);}
+
+    /* Dialogue */
+    .dialogue{margin:28px 0;}
+    .dialogue-line{display:flex;flex-direction:column;gap:4px;margin-bottom:16px;padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:4px;}
+    .dialogue-line.crystal-voice{border-left:3px solid var(--crystal);}
+    .dialogue-line.x{border-left:3px solid var(--danger);}
+    .dialogue-line.pox{border-left:3px solid var(--crystal2);}
+    .dialogue-speaker{font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;margin-bottom:5px;}
+    .dialogue-line.crystal-voice .dialogue-speaker{color:var(--crystal);}
+    .dialogue-line.x .dialogue-speaker{color:var(--danger);}
+    .dialogue-line.pox .dialogue-speaker{color:var(--crystal2);}
+    .dialogue-text{font-size:1rem;font-style:italic;color:rgba(240,234,208,.82);line-height:1.7;}
+
+    /* Sealed Ibza visual */
+    .sealed-visual{margin:36px 0;padding:32px;background:linear-gradient(135deg,rgba(0,0,0,.5),rgba(124,58,237,.06));border:1px solid rgba(167,139,250,.15);border-radius:6px;text-align:center;position:relative;overflow:hidden;}
+    .sealed-visual::before{content:'🗿';position:absolute;font-size:7rem;opacity:.06;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;}
+    .sealed-icon{font-size:3rem;margin-bottom:14px;display:block;filter:grayscale(80%);opacity:.6;}
+    .sealed-visual p{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;line-height:1.9;position:relative;z-index:1;}
+    .sealed-visual .sealed-name{font-family:'Cinzel Decorative',serif;font-size:1.1rem;color:rgba(167,139,250,.4);letter-spacing:.08em;margin-bottom:8px;}
+
+    /* Finale / ending */
+    .finale{margin-top:56px;padding:40px 32px;background:linear-gradient(135deg,rgba(0,0,0,.4),rgba(124,58,237,.06));border:1px solid rgba(167,139,250,.12);border-radius:6px;text-align:center;position:relative;overflow:hidden;}
+    .finale::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 80% at 50% 50%,rgba(124,58,237,.06) 0%,transparent 70%);pointer-events:none;}
+    .finale-label{font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.3em;color:var(--gold);text-transform:uppercase;margin-bottom:16px;}
+    .finale p{font-size:1.05rem;font-style:italic;color:rgba(240,234,208,.7);line-height:2;position:relative;z-index:1;}
+    .finale-sig{margin-top:24px;font-family:'Cinzel Decorative',serif;font-size:.85rem;color:var(--crystal);letter-spacing:.08em;}
+
+    /* Arc complete */
+    .arc-complete{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:36px;font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.2em;color:var(--crystal);text-transform:uppercase;padding:12px 24px;border:1px solid rgba(167,139,250,.25);border-radius:3px;background:rgba(124,58,237,.05);width:fit-content;margin-left:auto;margin-right:auto;animation:shimmer 2.5s ease-in-out infinite;}
+    @keyframes shimmer{0%,100%{opacity:.6}50%{opacity:1}}
+
+    /* NAV FOOTER */
+    .nav-footer{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(4,3,0,.94);backdrop-filter:blur(16px);border-top:1px solid rgba(167,139,250,.1);display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:64px;}
+    .nav-btn{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--border);padding:9px 22px;border-radius:3px;display:flex;align-items:center;gap:8px;transition:all .25s;}
+    .nav-btn:hover{color:var(--crystal);border-color:var(--crystal);background:rgba(167,139,250,.05);}
+    .nav-btn.primary{color:var(--gold);border-color:var(--gold2);}
+    .nav-btn.primary:hover{background:rgba(245,200,66,.08);border-color:var(--gold);}
+    .nav-page-info{font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;}
+    .nav-page-info span{color:var(--crystal);}
+
+    @keyframes rise{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  </style>
+</head>
+<body>
+  <div id="cur-dot"></div>
+  <div id="cur-ring"></div>
+  <canvas id="starfield"></canvas>
+  <div class="ambient"></div>
+
+  <nav>
+    <div class="nav-left">
+      <a href="story-hub.html" class="nav-back">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        Story Hub
+      </a>
+      <div class="nav-sep"></div>
+      <span class="nav-arc">Arc II · Ibza The First Crystal User</span>
+    </div>
+    <div class="nav-progress">
+      <div class="prog-dot done"><a href="arc2-p1.html"></a></div>
+      <div class="prog-dot done"><a href="arc2-p2.html"></a></div>
+      <div class="prog-dot done"><a href="arc2-p3.html"></a></div>
+      <div class="prog-dot done"><a href="arc2-p4.html"></a></div>
+      <div class="prog-dot active"></div>
+    </div>
+  </nav>
+
+  <main class="page">
+    <header class="chapter-header">
+      <div class="ch-arc">
+        <span class="ch-line l"></span>
+        Arc II · Ibza The First Crystal User
+        <span class="ch-line r"></span>
+      </div>
+      <div class="chapter-num">Bagian V</div>
+      <h1 class="chapter-title">Akhir yang Pahit</h1>
+      <div class="chapter-subtitle">Pure Crystal · Segel Terakhir · Pox Mengambil Alih</div>
+      <div class="ch-divider"></div>
+    </header>
+
+    <article class="story">
+
+      <div class="opening-quote">
+        <p>Pure Crystal mengambil alih tubuh Ibza sepenuhnya — terbang menuju X dengan kecepatan yang tidak dapat disaingi, mencekiknya, dan membawanya terbang tinggi ke langit.</p>
+        <cite>— Arc II · Ibza The First Crystal User</cite>
+      </div>
+
+      <!-- PURE CRYSTAL TAKES OVER -->
+      <div class="prose">
+        <p>
+          Di tengah kekacauan yang membakar seluruh Benua Bab,
+          saat Ibza hampir kehabisan tenaga melawan kebangkitan tiga lapis
+          panglima X — <em>Pure Crystal memutuskan untuk berbicara sendiri.</em>
+        </p>
+        <p>
+          Kristal itu mengambil alih tubuh Ibza sepenuhnya. Dari telapak tangannya
+          lahir pedang cahaya. Gerakannya berubah — lebih cepat dari kilat,
+          lebih tepat dari perhitungan apapun. Dalam sekejap, dua dari tiga kebangkitan
+          lenyap. Lalu kristal membuat satu ledakan dahsyat yang membelah tanah
+          seluas 5 kilometer dan meratakan segalanya di sekitarnya.
+        </p>
+      </div>
+
+      <div class="story-break">✦ ✦ ✦</div>
+
+      <!-- PURE CRYSTAL SPEAKS IN BINARY -->
+      <div class="prose">
+        <p>
+          Pure Crystal kemudian mencekik X dan membawanya terbang tinggi —
+          jauh di atas kehancuran Benua Bab.
+          Di ketinggian itu, kristal berbicara dalam bahasa yang tidak dimengerti X:
+        </p>
+      </div>
+
+      <div class="binary-block">
+        <div class="binary-label">💎 Pesan Pure Crystal — dalam bahasa biner</div>
+        <div class="binary-text">01001011 01100001 01110101 00100000 01100001 01100100 01100001 01101100 01100001 01101000 00100000 01101101 01100001 01101011 01101000 01101100 01110101 01101011 00100000 01110100 01100101 01110010 01101011 01100101 01101010 01101001 00100000 01100100 01100001 01101110 00100000 01101101 01100101 01101101 01100001 01101100 01110101 01101011 01100001 01101110 00100000 01100010 01100001 01100111 01101001 00100000 01110000 01100001 01110010 01100001 00100000 01100101 01101110 01110100 01101001 01110100 01111001 00100000 01110000 01100101 01101110 01101010 01100001 01100111 01100001 00100000 01110100 01101000 01100101 00100000 01101100 01101001 01110110 01101001 01101110 01100111 00100000 01110010 01100101 01100001 01101100 01101101</div>
+        <div class="binary-translation">Terjemahan: "Kau adalah makhluk terkejam dan memalalukan bagi para entity penjaga The Living Realm. Kau adalah aib bagi kami, dan kau seharusnya tidak pernah menjaga alam hancur tersebut."</div>
+      </div>
+
+      <div class="dialogue">
+        <div class="dialogue-line crystal-voice">
+          <div class="dialogue-speaker">Pure Crystal — dalam tubuh Ibza</div>
+          <div class="dialogue-text">"You… should not be here."</div>
+        </div>
+      </div>
+
+      <div class="prose">
+        <p>
+          X tidak memahami sepatah pun yang diucapkan kristal itu.
+          Namun di ketinggian yang sama, ia melihat sesuatu yang membuat darahnya membeku —
+          <em>para Entity Penjaga The Living Realm</em> menatap ke arahnya
+          dengan tatapan kecewa yang panjang, lalu pergi begitu saja
+          tanpa mengucapkan sepatah kata pun.
+        </p>
+        <p>
+          Pure Crystal menembakkan cahaya pekat dari wajah Ibza —
+          membakar dan mendorong X jatuh ke tanah dalam sekejap.
+        </p>
+      </div>
+
+      <div class="story-break">⚔ ⚔ ⚔</div>
+
+      <!-- X FIGHTS BACK / SEALS IBZA -->
+      <div class="prose">
+        <p>
+          X yang sudah tak berbentuk — hanya cairan tubuh yang meleleh —
+          meregenerasi dirinya kembali dalam hitungan detik dengan amarah yang meledak.
+          Ia berusaha memisahkan Ibza dari Pure Crystal secara paksa.
+          Pure Crystal melawan. Namun kekuatan X yang hampir mencapai tahap kedua
+          membuatnya kewalahan.
+        </p>
+        <p>
+          Pure Crystal memberi peringatan terakhir:
+        </p>
+      </div>
+
+      <div class="dialogue">
+        <div class="dialogue-line crystal-voice">
+          <div class="dialogue-speaker">Pure Crystal — kepada X</div>
+          <div class="dialogue-text">"Apa yang kau lakukan hanya akan menciptakan penyiksaan tanpa akhir — bagimu sendiri."</div>
+        </div>
+        <div class="dialogue-line x">
+          <div class="dialogue-speaker">X</div>
+          <div class="dialogue-text">— Tidak menjawab. Terus menyerang.</div>
+        </div>
+      </div>
+
+      <div class="prose">
+        <p>
+          X mencaci maki Ibza — dan kemarahan itu memancing kesadaran Ibza
+          untuk mengambil alih tubuhnya kembali dari Pure Crystal.
+          Itulah kesempatan yang X tunggu. Saat kristal dan Ibza tidak lagi selaras,
+          X bergerak.
+        </p>
+      </div>
+
+      <div class="lore-box danger">
+        <div class="lore-label">🩸 Ibza Disegel</div>
+        <p>X memisahkan Pure Crystal dari tubuh Ibza. Lalu ia menyegel Ibza — menikamnya berkali-kali dengan tentakel kekuatannya, menghancurkan pikirannya dengan asap terang yang masuk melalui mata, dan perlahan mengubah seluruh tubuh Ibza menjadi <strong>patung batu</strong>. Ibza berusaha meraih Pure Crystal yang kini terpisah dan tersegel — namun tangannya yang sudah membatu tidak bisa bergerak.</p>
+      </div>
+
+      <div class="sealed-visual">
+        <span class="sealed-icon">🗿</span>
+        <div class="sealed-name">Ibza — The First Crystal User</div>
+        <p>Terikat oleh segel-segel tentakel yang menyerupai batang pohon<br/>
+        Berdiri di puncaknya, tangan terentang berusaha meraih kristal<br/>
+        Dipajang di depan pintu masuk Istana yang baru dibangun ulang</p>
+      </div>
+
+      <div class="story-break">✦ ✦ ✦</div>
+
+      <!-- POX TAKES OVER -->
+      <div class="prose">
+        <p>
+          X terduduk lemas. Pure Crystal yang tersegel hampir meledak dengan kekuatan
+          yang tak tertahankan. Namun kemudian — <em>Pox bergerak</em>.
+        </p>
+        <p>
+          Pox keluar sementara dari tubuh Xrefz, membiarkan tubuh Xrefz terluka parah.
+          Ia mengambil Pure Crystal dan menyegelnya dengan kekuatannya sendiri —
+          lalu meletakkan kristal itu di tangan Ibza yang sudah menjadi patung.
+          Sebuah segel di dalam segel. Sebuah penjara di dalam penjara.
+        </p>
+      </div>
+
+      <div class="lore-box dark">
+        <div class="lore-label">🌑 Pox Mengambil Alih Segalanya</div>
+        <p>Pox kemudian membangun kembali seluruh Istana yang sudah hancur menggunakan kekuatannya. Ia masuk kembali ke tubuh Xrefz yang sudah hampir membusuk. Namun kali ini — X yang bangkit bukan lagi X seperti sebelumnya. Kini ia <strong>sepenuhnya adalah Pox itu sendiri.</strong> Tidak ada lagi Xrefz. Tidak ada lagi bagian dari manusia yang pernah memiliki adik, yang pernah merasakan sakit, yang pernah memberontak demi keadilan. Yang tinggal hanya Pox — dalam wujud yang paling sempurna untuk menguasai Fearth.</p>
+      </div>
+
+      <div class="story-break">✦ ✦ ✦</div>
+
+      <div class="prose">
+        <p>
+          Fearth kini sunyi. Benua Bab sudah hancur menjadi neraka.
+          Benua Seng kehilangan panglimanya, kehilangan Faton,
+          dan kini kehilangan Ibza yang berdiri membatu di depan istana musuh.
+          X — atau lebih tepatnya Pox — duduk di singgasana yang baru.
+        </p>
+        <p>
+          Planet yang dulunya penuh kemakmuran itu akan menjadi
+          <em>tempat yang amat damai di permukaannya —</em>
+          namun dengan peraturan-peraturan yang jauh lebih menyiksa
+          dari apapun yang pernah ada sebelumnya.
+        </p>
+      </div>
+
+      <!-- FINALE -->
+      <div class="finale">
+        <div class="finale-label">✦ Akhir Arc II ✦</div>
+        <p>
+          Ibza tidak kalah karena lemah.<br/>
+          Ia kalah karena ia <em>manusia</em> — dan Pure Crystal,<br/>
+          meski memilihnya, belum sepenuhnya mempercayainya.<br/><br/>
+          Satu Pengguna Kristal Pertama kini tersegel dalam batu.<br/>
+          Satu planet kini jatuh dalam genggaman entity yang tidak seharusnya di sana.<br/>
+          Dan kristal murni itu — menunggu lagi. Dalam senyap. Dalam batu.<br/><br/>
+          <em>Sampai tangan yang tepat datang menyentuhnya kembali.</em>
+        </p>
+        <div class="finale-sig">— The Secret of Crystal —</div>
+      </div>
+
+      <div class="arc-complete">
+        💎 &nbsp; Arc II Selesai &nbsp; · &nbsp; Kembali ke Story Hub &nbsp; 💎
+      </div>
+
+    </article>
+  </main>
+
+  <!-- BOTTOM NAV -->
+  <div class="nav-footer">
+    <a href="arc2-p4.html" class="nav-btn">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Kembali
+    </a>
+    <div class="nav-page-info">Halaman <span>5</span> / 5</div>
+    <a href="../story-hub.html" class="nav-btn primary">
+      Story Hub
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+
+  <script>
+    /* Cursor */
+    const dot=document.getElementById('cur-dot'),ring=document.getElementById('cur-ring');
+    let mx=0,my=0,rx=0,ry=0;
+    document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;dot.style.left=mx-3+'px';dot.style.top=my-3+'px';});
+    (function loop(){rx+=(mx-rx-14)*.1;ry+=(my-ry-14)*.1;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(loop);})();
+
+    /* Starfield — lebih gelap, lebih ungu, untuk finale */
+    const cv=document.getElementById('starfield'),cx=cv.getContext('2d');
+    let W,H,stars=[];
+    function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight;}
+    function initS(){
+      stars=Array.from({length:200},()=>({
+        x:Math.random()*W, y:Math.random()*H,
+        r:Math.random()*1.2+.15,
+        a:Math.random()*.7,
+        sp:Math.random()*.2+.03,
+        tw:Math.random()*Math.PI*2,
+        purple:Math.random()<.15,
+        gold:Math.random()<.05
+      }));
+    }
+    function draw(){
+      cx.clearRect(0,0,W,H);
+      const t=Date.now()*.001;
+      stars.forEach(s=>{
+        const a=s.a*(.35+.65*Math.sin(t*s.sp+s.tw));
+        cx.beginPath(); cx.arc(s.x,s.y,s.r,0,Math.PI*2);
+        if(s.gold)      cx.fillStyle=`rgba(245,200,66,${a*.7})`;
+        else if(s.purple) cx.fillStyle=`rgba(167,139,250,${a*.9})`;
+        else            cx.fillStyle=`rgba(240,234,208,${a*.5})`;
+        cx.fill();
+      });
+      requestAnimationFrame(draw);
+    }
+    resize();initS();draw();
+    window.addEventListener('resize',()=>{resize();initS();});
+  </script>
+</body>
+</html>

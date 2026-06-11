@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Disiplin 7 Hari</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #0f172a;
+    color: #e5e7eb;
+    padding: 20px;
+}
+
+.container {
+    max-width: 600px;
+    margin: auto;
+    background: #1e293b;
+    padding: 20px;
+    border-radius: 12px;
+}
+
+h1 {
+    text-align: center;
+    color: #38bdf8;
+}
+
+.task {
+    background: #334155;
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+}
+
+.task input {
+    margin-right: 10px;
+}
+
+.completed {
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+
+textarea {
+    width: 100%;
+    height: 80px;
+    margin-top: 10px;
+    border-radius: 8px;
+    padding: 8px;
+}
+
+.timer {
+    text-align: center;
+    font-size: 24px;
+    margin: 15px 0;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.start { background: #22c55e; }
+.done { background: #38bdf8; }
+.reset { background: #ef4444; }
+
+.warning {
+    margin-top: 15px;
+    padding: 10px;
+    background: #7f1d1d;
+    border-radius: 8px;
+    text-align: center;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h1> Disiplinkan dan perbaiki Dirimu </h1>
+
+<div id="tasks"></div>
+
+<h3>✍️ Kejujuran Hari Ini</h3>
+<textarea id="honesty" placeholder="Tulis kejujuran paling jujur..."></textarea>
+
+<div class="timer" id="timer">20:00</div>
+<button class="start" onclick="startTimer()">Mulai 20 Menit</button>
+
+<h3>🔥 Streak: <span id="streak">0</span> hari</h3>
+
+<button class="done" onclick="completeDay()">Selesaikan Hari</button>
+<button class="reset" onclick="resetAll()">Reset Semua</button>
+
+<div class="warning">
+⛔ Tidak boleh menyakiti diri sendiri...  jika iya, harus ulang dari Hari 1
+</div>
+
+</div>
+
+<script>
+const taskList = [
+"Push-up 30–50",
+"Sit-up 30",
+"Plank 1–2 menit",
+"Jalan 20 menit",
+"Duduk diam 20 menit",
+"Mandi air dingin",
+"Puasa distraksi",
+"Tulis 1 kejujuran"
+];
+
+const container = document.getElementById("tasks");
+
+// LOAD TASK
+taskList.forEach((task, i) => {
+    const div = document.createElement("div");
+    div.className = "task";
+
+    const input = document.createElement("input");
+    input.type = "checkbox";
+
+    input.checked = localStorage.getItem("task" + i) === "true";
+
+    if(input.checked) div.classList.add("completed");
+
+    input.onchange = () => {
+        localStorage.setItem("task" + i, input.checked);
+        div.classList.toggle("completed");
+    };
+
+    div.appendChild(input);
+    div.append(" " + task);
+    container.appendChild(div);
+});
+
+// HONESTY
+const honesty = document.getElementById("honesty");
+honesty.value = localStorage.getItem("honesty") || "";
+
+honesty.addEventListener("input", () => {
+    localStorage.setItem("honesty", honesty.value);
+});
+
+// TIMER
+let time = 1200;
+let interval;
+
+function startTimer(){
+    clearInterval(interval);
+    interval = setInterval(() => {
+        let min = Math.floor(time / 60);
+        let sec = time % 60;
+
+        document.getElementById("timer").innerText =
+        `${min}:${sec < 10 ? "0" : ""}${sec}`;
+
+        time--;
+
+        if(time < 0){
+            clearInterval(interval);
+            alert("Sesi selesai. Kamu bertahan.");
+            time = 1200;
+        }
+    }, 1000);
+}
+
+// STREAK
+let streak = localStorage.getItem("streak") || 0;
+document.getElementById("streak").innerText = streak;
+
+// COMPLETE DAY
+function completeDay(){
+    let allChecked = taskList.every((_, i) => {
+        return localStorage.getItem("task" + i) === "true";
+    });
+
+    let honestyText = honesty.value.trim();
+
+    if(!allChecked){
+        alert("Checklist belum selesai. Jangan bohong ke diri sendiri... bukankah kau ingin memperbaiki diri?");
+        return;
+    }
+
+    if(honestyText.length < 10){
+        alert("Kejujuranmu terlalu dangkal.");
+        return;
+    }
+
+    streak++;
+    localStorage.setItem("streak", streak);
+
+    // reset harian
+    taskList.forEach((_, i) => {
+        localStorage.setItem("task" + i, false);
+    });
+
+    localStorage.setItem("honesty", "");
+
+    alert("Hari selesai... jika saja kau jujur,,, Lanjut besok lagi, ini WAJIB");
+    location.reload();
+}
+honesty.addEventListener("input", () => {
+    localStorage.setItem("honesty", honesty.value);
+});
+// RESET
+function resetAll(){
+    localStorage.clear();
+    location.reload();
+}
+</script>
+
+</body>
+</html>

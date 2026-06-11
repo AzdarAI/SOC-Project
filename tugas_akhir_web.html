@@ -1,0 +1,1631 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WebCraft Academy — Tugas Akhir Semester 2</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;700;800&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* =========================================
+       MODUL 9 — MEMPERCANTIK DENGAN CSS
+       ========================================= */
+
+    /* === CSS Variables === */
+    :root {
+      --bg:        #0a0c14;
+      --bg2:       #0f1220;
+      --card:      #141826;
+      --border:    #1e2438;
+      --accent:    #4fffb0;
+      --accent2:   #ff6b6b;
+      --accent3:   #ffd166;
+      --text:      #e8eaf0;
+      --muted:     #7a8199;
+      --radius:    12px;
+      --font-head: 'Syne', sans-serif;
+      --font-mono: 'Space Mono', monospace;
+      --font-body: 'Lato', sans-serif;
+    }
+
+    /* === Reset & Base === */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      line-height: 1.7;
+      cursor: none; /* custom cursor aktif */
+      overflow-x: hidden;
+    }
+
+    /* =========================================
+       MODUL 10 — JS & HOVER / CUSTOM CURSOR
+       ========================================= */
+    #cursor-dot {
+      width: 8px; height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+      position: fixed;
+      top: 0; left: 0;
+      pointer-events: none;
+      z-index: 9999;
+      transition: transform 0.1s ease;
+      box-shadow: 0 0 12px var(--accent);
+    }
+    #cursor-ring {
+      width: 36px; height: 36px;
+      border: 2px solid var(--accent);
+      border-radius: 50%;
+      position: fixed;
+      top: 0; left: 0;
+      pointer-events: none;
+      z-index: 9998;
+      transition: all 0.15s ease;
+      opacity: 0.6;
+    }
+    body:has(a:hover) #cursor-ring,
+    body:has(button:hover) #cursor-ring {
+      transform: scale(1.7);
+      background: rgba(79,255,176,0.08);
+    }
+
+    /* === Scrollbar === */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+    /* =========================================
+       NAVBAR
+       ========================================= */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(10,12,20,0.85);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      height: 60px;
+    }
+    .nav-logo {
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--muted); }
+    .nav-links {
+      display: flex; gap: 6px;
+      list-style: none;
+      flex-wrap: wrap;
+    }
+    .nav-links a {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 5px 10px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      transition: all 0.25s;
+    }
+    .nav-links a:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: rgba(79,255,176,0.06);
+    }
+
+    /* =========================================
+       HERO
+       ========================================= */
+    .hero {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      text-align: center;
+      padding: 80px 24px 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 50% 30%, rgba(79,255,176,0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 80% 80%, rgba(255,107,107,0.06) 0%, transparent 60%);
+    }
+    .grid-bg {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 50px 50px;
+      opacity: 0.25;
+      animation: gridPulse 8s ease-in-out infinite;
+    }
+    @keyframes gridPulse { 0%,100%{opacity:.15} 50%{opacity:.3} }
+
+    .hero-content { position: relative; z-index: 1; max-width: 800px; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      padding: 6px 14px;
+      border-radius: 100px;
+      margin-bottom: 28px;
+      animation: fadeUp 0.7s ease both;
+    }
+    .badge-dot {
+      width: 6px; height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: blink 1.4s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+
+    h1 {
+      font-family: var(--font-head);
+      font-size: clamp(2.5rem, 7vw, 5rem);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+      animation: fadeUp 0.8s 0.1s ease both;
+    }
+    h1 .line2 { color: var(--accent); }
+
+    .hero-sub {
+      font-family: var(--font-body);
+      font-size: 1.1rem;
+      color: var(--muted);
+      max-width: 500px;
+      margin: 0 auto 40px;
+      animation: fadeUp 0.8s 0.2s ease both;
+    }
+    .hero-meta {
+      display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+      animation: fadeUp 0.8s 0.3s ease both;
+    }
+    .meta-pill {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 100px;
+    }
+    .meta-pill strong { color: var(--text); }
+
+    /* =========================================
+       SECTION LAYOUT
+       ========================================= */
+    section {
+      padding: 80px 24px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: 8px;
+    }
+    h2 {
+      font-family: var(--font-head);
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+    .section-desc {
+      color: var(--muted);
+      margin-bottom: 36px;
+      max-width: 580px;
+    }
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 0;
+    }
+
+    /* Card */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .card:hover {
+      border-color: rgba(79,255,176,0.3);
+      box-shadow: 0 0 30px rgba(79,255,176,0.06);
+    }
+    .card h3 {
+      font-family: var(--font-head);
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 14px;
+      color: var(--accent3);
+    }
+
+    /* Code block */
+    .code-block {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: #a8b2d8;
+      overflow-x: auto;
+      white-space: pre;
+      line-height: 1.6;
+    }
+
+    /* =========================================
+       MODUL 1 — STRUKTUR HTML
+       ========================================= */
+    .html-tree {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      line-height: 2;
+      color: var(--muted);
+    }
+    .html-tree .tag { color: #ff6b6b; }
+    .html-tree .attr { color: #ffd166; }
+    .html-tree .val { color: #4fffb0; }
+    .html-tree .indent1 { padding-left: 20px; }
+    .html-tree .indent2 { padding-left: 40px; }
+    .html-tree .indent3 { padding-left: 60px; }
+    .html-tree .indent4 { padding-left: 80px; }
+
+    .structure-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media(max-width:600px){ .structure-grid{grid-template-columns:1fr} }
+
+    /* =========================================
+       MODUL 2 — PEMFORMATAN TEKS
+       ========================================= */
+    .text-demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+    .text-pill {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .text-pill .label-sm {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .text-pill .demo { font-size: 1rem; }
+
+    /* =========================================
+       MODUL 3 — IMAGE & VIDEO
+       ========================================= */
+    .media-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media(max-width:600px){ .media-grid{grid-template-columns:1fr} }
+    .img-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--card);
+    }
+    .img-card img {
+      width: 100%; height: 200px;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.4s ease;
+    }
+    .img-card:hover img { transform: scale(1.05); }
+    .img-caption {
+      padding: 12px 16px;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+    .video-wrap {
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .video-wrap video {
+      width: 100%; display: block;
+      background: #000;
+    }
+
+    /* =========================================
+       MODUL 4 — HYPERLINK
+       ========================================= */
+    .link-showcase {
+      display: flex; flex-wrap: wrap; gap: 14px; align-items: center;
+    }
+    .link-normal { color: var(--accent); text-decoration: underline; transition: opacity .2s; }
+    .link-normal:hover { opacity: 0.7; }
+    .link-btn {
+      display: inline-block;
+      background: var(--accent);
+      color: var(--bg);
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 8px 18px;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: opacity .2s, transform .2s;
+    }
+    .link-btn:hover { opacity: 0.85; transform: translateY(-2px); }
+    .link-ghost {
+      display: inline-block;
+      border: 1px solid var(--accent2);
+      color: var(--accent2);
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      padding: 8px 18px;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background .2s, color .2s;
+    }
+    .link-ghost:hover { background: var(--accent2); color: var(--bg); }
+
+    /* =========================================
+       MODUL 5 — LIST
+       ========================================= */
+    .list-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    @media(max-width:700px){ .list-grid{grid-template-columns:1fr} }
+    ul.styled-ul {
+      list-style: none;
+      padding: 0;
+    }
+    ul.styled-ul li {
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+      font-size: 0.92rem;
+    }
+    ul.styled-ul li::before {
+      content: '▸';
+      color: var(--accent);
+      font-size: 0.7rem;
+    }
+    ol.styled-ol {
+      list-style: none;
+      counter-reset: steps;
+      padding: 0;
+    }
+    ol.styled-ol li {
+      counter-increment: steps;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 12px;
+      font-size: 0.92rem;
+    }
+    ol.styled-ol li::before {
+      content: counter(steps, decimal-leading-zero);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--accent3);
+      min-width: 28px;
+    }
+    dl.styled-dl dt {
+      font-weight: 700;
+      color: var(--accent2);
+      margin-top: 12px;
+      font-size: 0.9rem;
+    }
+    dl.styled-dl dd {
+      margin-left: 14px;
+      color: var(--muted);
+      font-size: 0.88rem;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* =========================================
+       MODUL 6 — TABEL
+       ========================================= */
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    thead { background: rgba(79,255,176,0.08); }
+    thead th {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      padding: 14px 18px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.2s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(255,255,255,0.03); }
+    tbody td {
+      padding: 13px 18px;
+      color: var(--muted);
+    }
+    tbody td:first-child { color: var(--text); font-weight: 600; }
+    .badge-tag {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      padding: 2px 10px;
+      border-radius: 100px;
+      border: 1px solid;
+    }
+    .badge-tag.green { color: var(--accent); border-color: var(--accent); }
+    .badge-tag.yellow { color: var(--accent3); border-color: var(--accent3); }
+    .badge-tag.red { color: var(--accent2); border-color: var(--accent2); }
+
+    /* =========================================
+       MODUL 7 — FRAME (IFRAME)
+       ========================================= */
+    .frame-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media(max-width:650px){.frame-container{grid-template-columns:1fr}}
+    .frame-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--card);
+    }
+    .frame-bar {
+      background: var(--bg);
+      padding: 10px 16px;
+      display: flex; align-items: center; gap: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .frame-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .frame-dot.r { background: #ff5f57; }
+    .frame-dot.y { background: #febc2e; }
+    .frame-dot.g { background: #28c840; }
+    .frame-bar span {
+      margin-left: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--muted);
+      flex: 1;
+      background: rgba(255,255,255,0.05);
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+    .frame-card iframe {
+      width: 100%;
+      height: 220px;
+      border: none;
+      display: block;
+    }
+
+    /* =========================================
+       MODUL 8 — FORM & INPUT
+       ========================================= */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media(max-width:600px){.form-grid{grid-template-columns:1fr}}
+    .form-group { display: flex; flex-direction: column; gap: 8px; }
+    .form-group label {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--accent3);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      padding: 10px 14px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      cursor: none;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(79,255,176,0.12);
+    }
+    .form-group textarea { resize: vertical; min-height: 90px; }
+    .form-group select option { background: var(--bg2); }
+
+    .radio-group, .check-group {
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .radio-item, .check-item {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 0.9rem; color: var(--muted);
+    }
+    input[type="radio"], input[type="checkbox"] {
+      accent-color: var(--accent);
+      width: 16px; height: 16px;
+      cursor: none;
+    }
+
+    .form-range { width: 100%; accent-color: var(--accent); cursor: none; }
+    .range-label {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--accent);
+      text-align: right;
+    }
+
+    .btn {
+      background: var(--accent);
+      color: var(--bg);
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 12px 28px;
+      border: none;
+      border-radius: 10px;
+      cursor: none;
+      transition: opacity .2s, transform .2s;
+      letter-spacing: 0.04em;
+    }
+    .btn:hover { opacity: 0.85; transform: translateY(-2px); }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); opacity: 1; }
+
+    /* =========================================
+       MODUL 9 — CSS SHOWCASE
+       ========================================= */
+    .css-demo-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+    @media(max-width:700px){.css-demo-grid{grid-template-columns:1fr 1fr}}
+    .css-demo-box {
+      border-radius: 10px;
+      height: 100px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      transition: transform 0.3s, filter 0.3s;
+    }
+    .css-demo-box:hover { transform: translateY(-6px); filter: brightness(1.15); }
+    .box-grad1 { background: linear-gradient(135deg, #4fffb0, #00b4d8); color: #0a0c14; }
+    .box-grad2 { background: linear-gradient(135deg, #ff6b6b, #ffd166); color: #0a0c14; }
+    .box-grad3 { background: linear-gradient(135deg, #a855f7, #ec4899); color: #fff; }
+    .box-shadow1 { background: var(--card); border: 1px solid var(--border); color: var(--accent); box-shadow: 0 0 24px rgba(79,255,176,0.25), inset 0 0 12px rgba(79,255,176,0.08); }
+    .box-shadow2 { background: var(--card); border: 1px solid var(--border); color: var(--accent2); box-shadow: 0 0 24px rgba(255,107,107,0.25), inset 0 0 12px rgba(255,107,107,0.08); }
+    .box-anim {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--accent3);
+      animation: rotateHue 4s linear infinite;
+    }
+    @keyframes rotateHue {
+      0%  { box-shadow: 0 0 20px #4fffb0; border-color: #4fffb0; }
+      33% { box-shadow: 0 0 20px #ff6b6b; border-color: #ff6b6b; }
+      66% { box-shadow: 0 0 20px #ffd166; border-color: #ffd166; }
+      100%{ box-shadow: 0 0 20px #4fffb0; border-color: #4fffb0; }
+    }
+
+    .css-props-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .prop-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.87rem;
+    }
+    .prop-name { font-family: var(--font-mono); font-size: 0.78rem; color: var(--muted); }
+    .prop-val  { font-family: var(--font-mono); font-size: 0.78rem; color: var(--accent); }
+
+    /* =========================================
+       MODUL 10 — JS DEMO AREA
+       ========================================= */
+    .js-demo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media(max-width:600px){.js-demo-grid{grid-template-columns:1fr}}
+    .js-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+    .js-box h4 {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--accent3);
+      margin-bottom: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .counter-display {
+      font-family: var(--font-mono);
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-align: center;
+      padding: 16px;
+      text-shadow: 0 0 24px rgba(79,255,176,0.4);
+    }
+    .counter-btns {
+      display: flex; gap: 10px; justify-content: center;
+      flex-wrap: wrap;
+    }
+    .counter-btn {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      padding: 8px 20px;
+      border-radius: 8px;
+      cursor: none;
+      transition: border-color .2s, color .2s;
+    }
+    .counter-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .color-box {
+      height: 80px;
+      border-radius: 10px;
+      margin-bottom: 14px;
+      transition: background 0.4s;
+      border: 1px solid var(--border);
+    }
+    .color-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+    .color-btn {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: none;
+      transition: transform .2s, border-color .2s;
+    }
+    .color-btn:hover { transform: scale(1.2); border-color: #fff; }
+
+    #clock-display {
+      font-family: var(--font-mono);
+      font-size: 2.2rem;
+      color: var(--accent3);
+      text-align: center;
+      padding: 12px 0;
+      letter-spacing: 0.08em;
+    }
+    #clock-date {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .hover-word-wrap {
+      display: flex; flex-wrap: wrap; gap: 8px;
+    }
+    .hover-word {
+      display: inline-block;
+      font-family: var(--font-head);
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--muted);
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      transition: all 0.25s;
+    }
+    .hover-word:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: rgba(79,255,176,0.06);
+      transform: translateY(-3px);
+    }
+
+    /* =========================================
+       FOOTER
+       ========================================= */
+    footer {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      padding: 48px 40px;
+      text-align: center;
+    }
+    .footer-title {
+      font-family: var(--font-head);
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .footer-title span { color: var(--accent); }
+    .footer-sub { color: var(--muted); font-size: 0.88rem; margin-bottom: 24px; }
+    .footer-modules {
+      display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+      max-width: 700px; margin: 0 auto 28px;
+    }
+    .footer-mod {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 5px 12px;
+      border-radius: 100px;
+    }
+    .footer-mod.done {
+      color: var(--accent);
+      border-color: rgba(79,255,176,0.3);
+      background: rgba(79,255,176,0.05);
+    }
+    .copyright {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    /* Scroll reveal helper */
+    .reveal {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== MODUL 10: CUSTOM CURSOR ===== -->
+  <div id="cursor-dot"></div>
+  <div id="cursor-ring"></div>
+
+  <!-- ===== NAVIGASI (MODUL 4: HYPERLINK) ===== -->
+  <nav>
+    <a href="#hero" class="nav-logo">web<span>craft</span>.html</a>
+    <ul class="nav-links">
+      <li><a href="#m1">01 HTML</a></li>
+      <li><a href="#m2">02 Teks</a></li>
+      <li><a href="#m3">03 Media</a></li>
+      <li><a href="#m4">04 Link</a></li>
+      <li><a href="#m5">05 List</a></li>
+      <li><a href="#m6">06 Tabel</a></li>
+      <li><a href="#m7">07 Frame</a></li>
+      <li><a href="#m8">08 Form</a></li>
+      <li><a href="#m9">09 CSS</a></li>
+      <li><a href="#m10">10 JS</a></li>
+    </ul>
+  </nav>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero" id="hero">
+    <div class="grid-bg"></div>
+    <div class="hero-content">
+      <div class="hero-badge"><span class="badge-dot"></span> Tugas Akhir Semester 2</div>
+      <h1>Menguasai<br><span class="line2">Dasar Web</span></h1>
+      <p class="hero-sub">Eksplorasi 10 modul fondasi pengembangan web — dari struktur HTML hingga interaktivitas JavaScript.</p>
+      <div class="hero-meta">
+        <span class="meta-pill">📚 <strong>10 Modul</strong> Pembelajaran</span>
+        <span class="meta-pill">🎨 HTML · CSS · JS</span>
+        <span class="meta-pill">✦ Tugas Akhir</span>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ===== MODUL 1: STRUKTUR HTML ===== -->
+  <section id="m1" class="reveal">
+    <div class="section-label">Modul 01</div>
+    <h2>Struktur HTML</h2>
+    <p class="section-desc">HTML (HyperText Markup Language) adalah tulang punggung setiap halaman web. Setiap dokumen HTML memiliki hierarki elemen yang terstruktur.</p>
+
+    <div class="structure-grid">
+      <div class="card">
+        <h3>Anatomi Dokumen HTML</h3>
+        <div class="html-tree">
+          <div><span class="tag">&lt;!DOCTYPE html&gt;</span></div>
+          <div><span class="tag">&lt;html</span> <span class="attr">lang</span>=<span class="val">"id"</span><span class="tag">&gt;</span></div>
+          <div class="indent1"><span class="tag">&lt;head&gt;</span></div>
+          <div class="indent2"><span class="tag">&lt;meta</span> <span class="attr">charset</span>=<span class="val">"UTF-8"</span><span class="tag">/&gt;</span></div>
+          <div class="indent2"><span class="tag">&lt;title&gt;</span>Judul<span class="tag">&lt;/title&gt;</span></div>
+          <div class="indent1"><span class="tag">&lt;/head&gt;</span></div>
+          <div class="indent1"><span class="tag">&lt;body&gt;</span></div>
+          <div class="indent2"><span class="tag">&lt;header&gt;</span></div>
+          <div class="indent3"><span class="tag">&lt;h1&gt;</span>Judul Utama<span class="tag">&lt;/h1&gt;</span></div>
+          <div class="indent2"><span class="tag">&lt;/header&gt;</span></div>
+          <div class="indent2"><span class="tag">&lt;main&gt;</span></div>
+          <div class="indent3"><span class="tag">&lt;section&gt;</span></div>
+          <div class="indent4"><span class="tag">&lt;p&gt;</span>Konten...<span class="tag">&lt;/p&gt;</span></div>
+          <div class="indent3"><span class="tag">&lt;/section&gt;</span></div>
+          <div class="indent2"><span class="tag">&lt;/main&gt;</span></div>
+          <div class="indent2"><span class="tag">&lt;footer&gt;</span><span class="tag">&lt;/footer&gt;</span></div>
+          <div class="indent1"><span class="tag">&lt;/body&gt;</span></div>
+          <div><span class="tag">&lt;/html&gt;</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Elemen Semantik HTML5</h3>
+        <div class="html-tree" style="gap:6px; display:flex; flex-direction:column;">
+          <div style="display:flex; gap:10px; align-items:center">
+            <span class="tag" style="min-width:100px">&lt;header&gt;</span>
+            <span style="color:var(--muted); font-size:0.78rem">Kepala halaman / bagian</span>
+          </div>
+          <div style="display:flex; gap:10px; align-items:center">
+            <span class="tag" style="min-width:100px">&lt;nav&gt;</span>
+            <span style="color:var(--muted); font-size:0.78rem">Navigasi utama</span>
+          </div>
+          <div style="display:flex; gap:10px; align-items:center">
+            <span class="tag" style="min-width:100px">&lt;main&gt;</span>
+            <span style="color:var(--muted); font-size:0.78rem">Konten utama halaman</span>
+          </div>
+          <div style="display:flex; gap:10px; align-items:center">
+            <span class="tag" style="min-width:100px">&lt;section&gt;</span>
+            <span style="color:var(--muted); font-size:0.78rem">Pengelompokan konten</span>
+          </div>
+          <div style="display:flex; gap:10px; align-items:center">
+            <span class="tag" style="min-width:100px">&lt;article&gt;</span>
+            <span style="color:var(--muted); font-size:0.78rem">Konten mandiri (artikel)</span>
+          </div>
+          <div style="display:flex; gap:10px; align-items:center">
+            <span class="tag" style="min-width:100px">&lt;aside&gt;</span>
+            <span style="color:var(--muted); font-size:0.78rem">Konten sampingan</span>
+          </div>
+          <div style="display:flex; gap:10px; align-items:center">
+            <span class="tag" style="min-width:100px">&lt;footer&gt;</span>
+            <span style="color:var(--muted); font-size:0.78rem">Kaki halaman / bagian</span>
+          </div>
+          <div style="display:flex; gap:10px; align-items:center">
+            <span class="tag" style="min-width:100px">&lt;figure&gt;</span>
+            <span style="color:var(--muted); font-size:0.78rem">Konten ilustrasi / media</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ===== MODUL 2: PEMFORMATAN TEKS ===== -->
+  <section id="m2" class="reveal">
+    <div class="section-label">Modul 02</div>
+    <h2>Pemformatan Teks &amp; Karakter Khusus</h2>
+    <p class="section-desc">HTML menyediakan berbagai tag untuk memformat teks dan menampilkan karakter khusus menggunakan HTML entities.</p>
+
+    <div class="text-demo-grid">
+      <div class="text-pill">
+        <span class="label-sm">&lt;b&gt; — Bold</span>
+        <span class="demo"><b>Teks ini dicetak tebal</b></span>
+      </div>
+      <div class="text-pill">
+        <span class="label-sm">&lt;i&gt; — Italic</span>
+        <span class="demo"><i>Teks ini dicetak miring</i></span>
+      </div>
+      <div class="text-pill">
+        <span class="label-sm">&lt;u&gt; — Underline</span>
+        <span class="demo"><u>Teks ini bergaris bawah</u></span>
+      </div>
+      <div class="text-pill">
+        <span class="label-sm">&lt;strong&gt; — Strong</span>
+        <span class="demo"><strong>Teks penting (semantik)</strong></span>
+      </div>
+      <div class="text-pill">
+        <span class="label-sm">&lt;em&gt; — Emphasis</span>
+        <span class="demo"><em>Teks dengan penekanan</em></span>
+      </div>
+      <div class="text-pill">
+        <span class="label-sm">&lt;mark&gt; — Highlight</span>
+        <span class="demo"><mark style="background:rgba(255,209,102,0.3); color:var(--accent3); padding:1px 6px; border-radius:4px">Teks disorot kuning</mark></span>
+      </div>
+      <div class="text-pill">
+        <span class="label-sm">&lt;del&gt; — Deleted</span>
+        <span class="demo"><del>Teks dihapus / coret</del></span>
+      </div>
+      <div class="text-pill">
+        <span class="label-sm">&lt;sub&gt; &amp; &lt;sup&gt;</span>
+        <span class="demo">H<sub>2</sub>O &nbsp;&nbsp; 2<sup>10</sup> = 1024</span>
+      </div>
+      <div class="text-pill">
+        <span class="label-sm">&lt;code&gt; — Code inline</span>
+        <span class="demo"><code style="background:var(--bg); padding:2px 8px; border-radius:5px; font-family:var(--font-mono); font-size:0.85rem; color:var(--accent)">console.log("Hello!")</code></span>
+      </div>
+      <div class="text-pill">
+        <span class="label-sm">&lt;abbr&gt; — Abbreviation</span>
+        <span class="demo"><abbr title="HyperText Markup Language">HTML</abbr> &amp; <abbr title="Cascading Style Sheets">CSS</abbr></span>
+      </div>
+      <div class="text-pill">
+        <span class="label-sm">&amp;entities; — Karakter Khusus</span>
+        <span class="demo" style="font-size:1.2rem; letter-spacing:0.1em">&copy; &reg; &trade; &hearts; &infin; &euro; &lt; &gt; &amp;</span>
+      </div>
+      <div class="text-pill">
+        <span class="label-sm">&lt;blockquote&gt; — Kutipan</span>
+        <blockquote style="border-left:3px solid var(--accent); padding-left:12px; color:var(--muted); font-style:italic; font-size:0.88rem; margin:4px 0 0">
+          "The web is for everyone." — Tim Berners-Lee
+        </blockquote>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ===== MODUL 3: IMAGE & VIDEO ===== -->
+  <section id="m3" class="reveal">
+    <div class="section-label">Modul 03</div>
+    <h2>Image &amp; Video</h2>
+    <p class="section-desc">Elemen <code style="color:var(--accent);font-family:var(--font-mono)">&lt;img&gt;</code> dan <code style="color:var(--accent);font-family:var(--font-mono)">&lt;video&gt;</code> digunakan untuk menyematkan konten media ke dalam halaman web.</p>
+
+    <div class="media-grid">
+      <!-- Gambar 1 -->
+      <figure class="img-card">
+        <img
+          src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=600&q=80"
+          alt="Kode program di layar monitor"
+          width="600"
+          height="200"
+          loading="lazy"
+        />
+        <figcaption class="img-caption">
+          📸 &lt;img src="coding.jpg" alt="Deskripsi"&gt;
+        </figcaption>
+      </figure>
+
+      <!-- Gambar 2 -->
+      <figure class="img-card">
+        <img
+          src="https://images.unsplash.com/photo-1547658719-da2b51169166?w=600&q=80"
+          alt="Desain antarmuka web modern"
+          width="600"
+          height="200"
+          loading="lazy"
+        />
+        <figcaption class="img-caption">
+          📸 Gambar dengan atribut: width, height, loading
+        </figcaption>
+      </figure>
+
+      <!-- Video -->
+      <div class="video-wrap" style="grid-column: span 2">
+        <video controls width="100%" poster="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=900&q=80"
+          style="max-height:240px; object-fit:cover">
+          <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" />
+          Browser Anda tidak mendukung tag video.
+        </video>
+        <div class="img-caption">🎬 &lt;video controls&gt;&lt;source src="..."&gt;&lt;/video&gt;</div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ===== MODUL 4: HYPERLINK ===== -->
+  <section id="m4" class="reveal">
+    <div class="section-label">Modul 04</div>
+    <h2>Hyperlink</h2>
+    <p class="section-desc">Tag <code style="color:var(--accent);font-family:var(--font-mono)">&lt;a&gt;</code> membuat tautan ke halaman lain, berkas, atau lokasi dalam halaman yang sama. Berbagai atribut mengubah perilaku tautan.</p>
+
+    <div class="card" style="margin-bottom:20px">
+      <h3>Jenis-Jenis Hyperlink</h3>
+      <div class="link-showcase">
+        <!-- Link eksternal biasa -->
+        <a href="https://www.google.com" target="_blank" rel="noopener" class="link-normal">🔗 Link Eksternal (target=_blank)</a>
+
+        <!-- Anchor dalam halaman -->
+        <a href="#hero" class="link-normal">⚓ Anchor Link (ke atas)</a>
+
+        <!-- Link mailto -->
+        <a href="mailto:contoh@email.com" class="link-normal">✉️ Mailto Link</a>
+
+        <!-- Link tel -->
+        <a href="tel:+6281234567890" class="link-normal">📞 Tel Link</a>
+
+        <!-- Button style -->
+        <a href="https://developer.mozilla.org" target="_blank" rel="noopener" class="link-btn">Kunjungi MDN →</a>
+
+        <!-- Ghost button style -->
+        <a href="https://www.w3schools.com" target="_blank" rel="noopener" class="link-ghost">W3Schools</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Atribut Hyperlink</h3>
+      <div class="code-block">
+&lt;!-- Link eksternal di tab baru --&gt;
+&lt;a href="https://example.com" target="_blank" rel="noopener noreferrer"&gt;
+  Buka di Tab Baru
+&lt;/a&gt;
+
+&lt;!-- Anchor: lompat ke section tertentu --&gt;
+&lt;a href="#bagian-tertentu"&gt;Ke Bagian Ini&lt;/a&gt;
+&lt;section id="bagian-tertentu"&gt;...&lt;/section&gt;
+
+&lt;!-- Download file --&gt;
+&lt;a href="file.pdf" download="nama-file.pdf"&gt;⬇ Download PDF&lt;/a&gt;
+
+&lt;!-- Kirim email --&gt;
+&lt;a href="mailto:user@email.com?subject=Halo"&gt;Kirim Email&lt;/a&gt;</div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ===== MODUL 5: LIST ===== -->
+  <section id="m5" class="reveal">
+    <div class="section-label">Modul 05</div>
+    <h2>List</h2>
+    <p class="section-desc">HTML memiliki tiga jenis daftar: unordered list (&lt;ul&gt;), ordered list (&lt;ol&gt;), dan definition list (&lt;dl&gt;) — masing-masing dengan kegunaan berbeda.</p>
+
+    <div class="list-grid">
+      <!-- Unordered List -->
+      <div class="card">
+        <h3>&lt;ul&gt; — Unordered List</h3>
+        <ul class="styled-ul">
+          <li>HTML — Struktur</li>
+          <li>CSS — Presentasi</li>
+          <li>JavaScript — Interaktivitas</li>
+          <li>React — Framework UI</li>
+          <li>Node.js — Backend</li>
+        </ul>
+      </div>
+
+      <!-- Ordered List -->
+      <div class="card">
+        <h3>&lt;ol&gt; — Ordered List</h3>
+        <ol class="styled-ol">
+          <li>Pelajari HTML dasar</li>
+          <li>Kuasai CSS styling</li>
+          <li>Tambahkan JavaScript</li>
+          <li>Gunakan framework</li>
+          <li>Deploy aplikasi</li>
+        </ol>
+      </div>
+
+      <!-- Definition List -->
+      <div class="card">
+        <h3>&lt;dl&gt; — Definition List</h3>
+        <dl class="styled-dl">
+          <dt>HTML</dt>
+          <dd>HyperText Markup Language</dd>
+          <dt>CSS</dt>
+          <dd>Cascading Style Sheets</dd>
+          <dt>DOM</dt>
+          <dd>Document Object Model</dd>
+          <dt>API</dt>
+          <dd>Application Programming Interface</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ===== MODUL 6: TABEL ===== -->
+  <section id="m6" class="reveal">
+    <div class="section-label">Modul 06</div>
+    <h2>Tabel</h2>
+    <p class="section-desc">Elemen <code style="color:var(--accent);font-family:var(--font-mono)">&lt;table&gt;</code> digunakan untuk menampilkan data tabular dengan baris dan kolom yang terstruktur.</p>
+
+    <div class="table-wrap">
+      <table>
+        <caption style="padding:14px; font-family:var(--font-mono); font-size:0.72rem; color:var(--muted); text-align:left; border-bottom:1px solid var(--border)">
+          📊 Perbandingan Teknologi Web
+        </caption>
+        <thead>
+          <tr>
+            <th>Teknologi</th>
+            <th>Tipe</th>
+            <th>Fungsi</th>
+            <th>Tingkat</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>HTML5</td>
+            <td>Markup</td>
+            <td>Struktur halaman web</td>
+            <td>Pemula</td>
+            <td><span class="badge-tag green">Wajib</span></td>
+          </tr>
+          <tr>
+            <td>CSS3</td>
+            <td>Stylesheet</td>
+            <td>Tampilan &amp; layout</td>
+            <td>Pemula</td>
+            <td><span class="badge-tag green">Wajib</span></td>
+          </tr>
+          <tr>
+            <td>JavaScript</td>
+            <td>Scripting</td>
+            <td>Interaktivitas &amp; logika</td>
+            <td>Menengah</td>
+            <td><span class="badge-tag yellow">Dianjurkan</span></td>
+          </tr>
+          <tr>
+            <td>React</td>
+            <td>Framework</td>
+            <td>Membangun UI komponen</td>
+            <td>Lanjutan</td>
+            <td><span class="badge-tag yellow">Opsional</span></td>
+          </tr>
+          <tr>
+            <td>Node.js</td>
+            <td>Runtime</td>
+            <td>JavaScript di server</td>
+            <td>Lanjutan</td>
+            <td><span class="badge-tag red">Opsional</span></td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="5" style="padding:12px 18px; color:var(--muted); font-size:0.82rem; font-style:italic; border-top:1px solid var(--border)">
+              * Mulai dari HTML &amp; CSS, lalu lanjutkan secara bertahap
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ===== MODUL 7: FRAME (IFRAME) ===== -->
+  <section id="m7" class="reveal">
+    <div class="section-label">Modul 07</div>
+    <h2>Frame &amp; IFrame</h2>
+    <p class="section-desc">Elemen <code style="color:var(--accent);font-family:var(--font-mono)">&lt;iframe&gt;</code> (Inline Frame) menyematkan dokumen atau konten eksternal di dalam halaman web Anda.</p>
+
+    <div class="frame-container">
+      <!-- IFrame 1: Wikipedia -->
+      <div class="frame-card">
+        <div class="frame-bar">
+          <span class="frame-dot r"></span>
+          <span class="frame-dot y"></span>
+          <span class="frame-dot g"></span>
+          <span>id.wikipedia.org/wiki/HTML</span>
+        </div>
+        <iframe
+          src="https://id.wikipedia.org/wiki/HTML"
+          title="Wikipedia HTML"
+          loading="lazy"
+          sandbox="allow-same-origin allow-scripts"
+        ></iframe>
+      </div>
+
+      <!-- IFrame 2: OpenStreetMap -->
+      <div class="frame-card">
+        <div class="frame-bar">
+          <span class="frame-dot r"></span>
+          <span class="frame-dot y"></span>
+          <span class="frame-dot g"></span>
+          <span>openstreetmap.org — Jakarta</span>
+        </div>
+        <iframe
+          src="https://www.openstreetmap.org/export/embed.html?bbox=106.7460%2C-6.2450%2C106.8460%2C-6.1450&layer=mapnik"
+          title="Peta Jakarta"
+          loading="lazy"
+        ></iframe>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:20px">
+      <h3>Kode IFrame</h3>
+      <div class="code-block">
+&lt;!-- Menyematkan halaman web lain --&gt;
+&lt;iframe
+  src="https://example.com"
+  width="100%"
+  height="300"
+  title="Deskripsi konten"
+  loading="lazy"
+  sandbox="allow-same-origin"
+&gt;&lt;/iframe&gt;
+
+&lt;!-- Menyematkan peta Google Maps --&gt;
+&lt;iframe
+  src="https://maps.google.com/maps?q=Jakarta&output=embed"
+  title="Peta Jakarta"
+  allowfullscreen
+&gt;&lt;/iframe&gt;</div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ===== MODUL 8: FORM & INPUT ===== -->
+  <section id="m8" class="reveal">
+    <div class="section-label">Modul 08</div>
+    <h2>Form &amp; Input</h2>
+    <p class="section-desc">Elemen <code style="color:var(--accent);font-family:var(--font-mono)">&lt;form&gt;</code> mengumpulkan data dari pengguna melalui berbagai jenis input.</p>
+
+    <div class="card">
+      <h3>📋 Formulir Pendaftaran</h3>
+      <form id="reg-form" onsubmit="handleSubmit(event)" novalidate>
+        <div class="form-grid" style="margin-bottom:20px">
+          <div class="form-group">
+            <label for="nama">Nama Lengkap</label>
+            <input type="text" id="nama" name="nama" placeholder="Masukkan nama Anda" required />
+          </div>
+          <div class="form-group">
+            <label for="email">Alamat Email</label>
+            <input type="email" id="email" name="email" placeholder="nama@email.com" required />
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="Min. 8 karakter" />
+          </div>
+          <div class="form-group">
+            <label for="tanggal">Tanggal Lahir</label>
+            <input type="date" id="tanggal" name="tanggal" />
+          </div>
+          <div class="form-group">
+            <label for="angkatan">Angkatan / Semester</label>
+            <select id="angkatan" name="angkatan">
+              <option value="">Pilih semester...</option>
+              <option value="1">Semester 1</option>
+              <option value="2" selected>Semester 2</option>
+              <option value="3">Semester 3</option>
+              <option value="4">Semester 4</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="website">URL Website</label>
+            <input type="url" id="website" name="website" placeholder="https://website-anda.com" />
+          </div>
+        </div>
+
+        <!-- Radio -->
+        <div class="form-grid" style="margin-bottom:20px">
+          <div class="form-group">
+            <label>Jenis Kelamin</label>
+            <div class="radio-group">
+              <label class="radio-item"><input type="radio" name="gender" value="laki" checked /> Laki-laki</label>
+              <label class="radio-item"><input type="radio" name="gender" value="perempuan" /> Perempuan</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Minat Belajar</label>
+            <div class="check-group">
+              <label class="check-item"><input type="checkbox" name="minat" value="frontend" checked /> Frontend Dev</label>
+              <label class="check-item"><input type="checkbox" name="minat" value="backend" /> Backend Dev</label>
+              <label class="check-item"><input type="checkbox" name="minat" value="design" /> UI/UX Design</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Range -->
+        <div class="form-group" style="margin-bottom:20px">
+          <label for="skill">Tingkat Keahlian HTML <span class="range-label" id="skill-val">50%</span></label>
+          <input type="range" id="skill" name="skill" class="form-range" min="0" max="100" value="50"
+            oninput="document.getElementById('skill-val').textContent = this.value + '%'" />
+        </div>
+
+        <!-- Textarea -->
+        <div class="form-group" style="margin-bottom:24px">
+          <label for="pesan">Pesan / Catatan</label>
+          <textarea id="pesan" name="pesan" placeholder="Tulis pesan Anda di sini..."></textarea>
+        </div>
+
+        <div style="display:flex; gap:12px; flex-wrap:wrap">
+          <button type="submit" class="btn">✓ Kirim Formulir</button>
+          <button type="reset" class="btn btn-outline">↺ Reset</button>
+        </div>
+
+        <div id="form-msg" style="display:none; margin-top:16px; padding:12px 16px; border-radius:8px; font-family:var(--font-mono); font-size:0.82rem; background:rgba(79,255,176,0.1); border:1px solid rgba(79,255,176,0.3); color:var(--accent)">
+          ✅ Formulir berhasil dikirim! Terima kasih.
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ===== MODUL 9: CSS ===== -->
+  <section id="m9" class="reveal">
+    <div class="section-label">Modul 09</div>
+    <h2>Mempercantik dengan CSS</h2>
+    <p class="section-desc">CSS (Cascading Style Sheets) mengontrol tampilan elemen HTML — warna, font, layout, animasi, dan banyak lagi.</p>
+
+    <div class="css-demo-grid">
+      <div class="css-demo-box box-grad1">Gradient #1</div>
+      <div class="css-demo-box box-grad2">Gradient #2</div>
+      <div class="css-demo-box box-grad3">Gradient #3</div>
+      <div class="css-demo-box box-shadow1">Glow Green</div>
+      <div class="css-demo-box box-shadow2">Glow Red</div>
+      <div class="css-demo-box box-anim">Animasi Hue</div>
+    </div>
+
+    <div class="css-props-grid" style="margin-top:28px">
+      <div class="card">
+        <h3>Properti Utama</h3>
+        <div class="prop-row"><span class="prop-name">color</span><span class="prop-val">#4fffb0</span></div>
+        <div class="prop-row"><span class="prop-name">background</span><span class="prop-val">linear-gradient(...)</span></div>
+        <div class="prop-row"><span class="prop-name">font-family</span><span class="prop-val">'Syne', sans-serif</span></div>
+        <div class="prop-row"><span class="prop-name">font-size</span><span class="prop-val">clamp(1rem, 4vw, 2rem)</span></div>
+        <div class="prop-row"><span class="prop-name">border-radius</span><span class="prop-val">12px</span></div>
+        <div class="prop-row"><span class="prop-name">box-shadow</span><span class="prop-val">0 0 24px rgba(...)</span></div>
+      </div>
+      <div class="card">
+        <h3>Layout CSS</h3>
+        <div class="prop-row"><span class="prop-name">display: flex</span><span class="prop-val">Flexbox</span></div>
+        <div class="prop-row"><span class="prop-name">display: grid</span><span class="prop-val">CSS Grid</span></div>
+        <div class="prop-row"><span class="prop-name">position: fixed</span><span class="prop-val">Fixed Pos</span></div>
+        <div class="prop-row"><span class="prop-name">transition</span><span class="prop-val">0.3s ease</span></div>
+        <div class="prop-row"><span class="prop-name">animation</span><span class="prop-val">@keyframes</span></div>
+        <div class="prop-row"><span class="prop-name">:hover</span><span class="prop-val">Pseudo-class</span></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:20px">
+      <h3>Contoh CSS Variables</h3>
+      <div class="code-block">
+:root {
+  --bg:      #0a0c14;     /* Warna latar belakang */
+  --accent:  #4fffb0;     /* Warna aksen utama    */
+  --text:    #e8eaf0;     /* Warna teks           */
+  --radius:  12px;        /* Sudut border         */
+}
+
+.card {
+  background:    var(--bg);
+  border-radius: var(--radius);
+  color:         var(--text);
+  transition:    all 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 0 30px rgba(79,255,176,0.15);
+  border-color: var(--accent);
+}</div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ===== MODUL 10: JS & HOVER ===== -->
+  <section id="m10" class="reveal">
+    <div class="section-label">Modul 10</div>
+    <h2>JavaScript &amp; Hover / Custom Cursor</h2>
+    <p class="section-desc">JavaScript memberikan interaktivitas pada halaman web. Dikombinasikan dengan event hover dan custom cursor untuk pengalaman yang lebih dinamis.</p>
+
+    <div class="js-demo-grid">
+      <!-- Counter -->
+      <div class="js-box">
+        <h4>🔢 Counter Interaktif</h4>
+        <div class="counter-display" id="count-display">0</div>
+        <div class="counter-btns">
+          <button class="counter-btn" onclick="changeCount(-10)">-10</button>
+          <button class="counter-btn" onclick="changeCount(-1)">-1</button>
+          <button class="counter-btn" onclick="changeCount(0)">Reset</button>
+          <button class="counter-btn" onclick="changeCount(1)">+1</button>
+          <button class="counter-btn" onclick="changeCount(10)">+10</button>
+        </div>
+      </div>
+
+      <!-- Jam Digital -->
+      <div class="js-box">
+        <h4>🕐 Jam Digital Real-time</h4>
+        <div id="clock-display">--:--:--</div>
+        <div id="clock-date"></div>
+        <div style="margin-top:16px; font-family:var(--font-mono); font-size:0.72rem; color:var(--muted); text-align:center">
+          Diperbarui setiap detik menggunakan setInterval()
+        </div>
+      </div>
+
+      <!-- Color Picker -->
+      <div class="js-box">
+        <h4>🎨 Background Color Changer</h4>
+        <div id="color-preview" class="color-box" style="background:var(--card)"></div>
+        <div class="color-btns">
+          <button class="color-btn" style="background:#4fffb0" onclick="setColor('#4fffb0')" title="Hijau"></button>
+          <button class="color-btn" style="background:#ff6b6b" onclick="setColor('#ff6b6b')" title="Merah"></button>
+          <button class="color-btn" style="background:#ffd166" onclick="setColor('#ffd166')" title="Kuning"></button>
+          <button class="color-btn" style="background:#a855f7" onclick="setColor('#a855f7')" title="Ungu"></button>
+          <button class="color-btn" style="background:#00b4d8" onclick="setColor('#00b4d8')" title="Biru"></button>
+          <button class="color-btn" style="background:#ec4899" onclick="setColor('#ec4899')" title="Pink"></button>
+          <button class="color-btn" style="background:#f97316" onclick="setColor('#f97316')" title="Oranye"></button>
+          <button class="color-btn" style="background:#1e2438" onclick="setColor('#1e2438')" title="Reset"></button>
+        </div>
+      </div>
+
+      <!-- Hover Demo -->
+      <div class="js-box">
+        <h4>✨ Hover Effect Demo</h4>
+        <div class="hover-word-wrap">
+          <span class="hover-word">Hover</span>
+          <span class="hover-word">Pada</span>
+          <span class="hover-word">Setiap</span>
+          <span class="hover-word">Kata</span>
+          <span class="hover-word">Ini!</span>
+          <span class="hover-word">CSS</span>
+          <span class="hover-word">:hover</span>
+          <span class="hover-word">+</span>
+          <span class="hover-word">JavaScript</span>
+          <span class="hover-word">Events</span>
+        </div>
+        <div id="hover-msg" style="margin-top:16px; font-family:var(--font-mono); font-size:0.72rem; color:var(--muted); min-height:20px; text-align:center"></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:20px">
+      <h3>Kode Custom Cursor (JS + CSS)</h3>
+      <div class="code-block">
+/* CSS — Sembunyikan cursor asli */
+body { cursor: none; }
+
+/* Elemen cursor kustom */
+#cursor-dot  { width:8px; height:8px; background:#4fffb0;
+               position:fixed; border-radius:50%; pointer-events:none; }
+#cursor-ring { width:36px; height:36px; border:2px solid #4fffb0;
+               position:fixed; border-radius:50%; pointer-events:none; }
+
+/* JavaScript — Ikuti posisi mouse */
+const dot  = document.getElementById('cursor-dot');
+const ring = document.getElementById('cursor-ring');
+
+document.addEventListener('mousemove', (e) => {
+  dot.style.left  = e.clientX - 4  + 'px';
+  dot.style.top   = e.clientY - 4  + 'px';
+  ring.style.left = e.clientX - 18 + 'px';
+  ring.style.top  = e.clientY - 18 + 'px';
+});</div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <div class="footer-title">Web<span>Craft</span> Academy</div>
+    <p class="footer-sub">Tugas Akhir Semester 2 — Pemrograman Web Dasar</p>
+    <div class="footer-modules">
+      <span class="footer-mod done">✓ 01 Struktur HTML</span>
+      <span class="footer-mod done">✓ 02 Pemformatan Teks</span>
+      <span class="footer-mod done">✓ 03 Image &amp; Video</span>
+      <span class="footer-mod done">✓ 04 Hyperlink</span>
+      <span class="footer-mod done">✓ 05 List</span>
+      <span class="footer-mod done">✓ 06 Tabel</span>
+      <span class="footer-mod done">✓ 07 Frame</span>
+      <span class="footer-mod done">✓ 08 Form &amp; Input</span>
+      <span class="footer-mod done">✓ 09 CSS</span>
+      <span class="footer-mod done">✓ 10 JS &amp; Hover</span>
+    </div>
+    <p class="copyright">&copy; 2025 Tugas Akhir Pemrograman Web &nbsp;·&nbsp; Dibuat dengan &hearts; HTML, CSS &amp; JavaScript</p>
+  </footer>
+
+  <!-- ===================================================
+       JAVASCRIPT — MODUL 10
+       =================================================== -->
+  <script>
+    /* ── Custom Cursor ── */
+    const dot  = document.getElementById('cursor-dot');
+    const ring = document.getElementById('cursor-ring');
+    let mx = 0, my = 0, rx = 0, ry = 0;
+
+    document.addEventListener('mousemove', e => {
+      mx = e.clientX; my = e.clientY;
+      dot.style.left = mx - 4 + 'px';
+      dot.style.top  = my - 4 + 'px';
+    });
+    // Ring follows with lag
+    function animRing() {
+      rx += (mx - rx - 18) * 0.12;
+      ry += (my - ry - 18) * 0.12;
+      ring.style.left = rx + 'px';
+      ring.style.top  = ry + 'px';
+      requestAnimationFrame(animRing);
+    }
+    animRing();
+
+    /* ── Counter ── */
+    let count = 0;
+    function changeCount(n) {
+      count = n === 0 ? 0 : count + n;
+      const el = document.getElementById('count-display');
+      el.textContent = count;
+      el.style.color = count > 0 ? '#4fffb0' : count < 0 ? '#ff6b6b' : '#ffd166';
+    }
+
+    /* ── Digital Clock ── */
+    function updateClock() {
+      const now = new Date();
+      const days = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+      const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+      const h = String(now.getHours()).padStart(2,'0');
+      const m = String(now.getMinutes()).padStart(2,'0');
+      const s = String(now.getSeconds()).padStart(2,'0');
+      document.getElementById('clock-display').textContent = `${h}:${m}:${s}`;
+      document.getElementById('clock-date').textContent =
+        `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    /* ── Color Changer ── */
+    function setColor(hex) {
+      document.getElementById('color-preview').style.background = hex;
+    }
+
+    /* ── Hover Word Events ── */
+    document.querySelectorAll('.hover-word').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        document.getElementById('hover-msg').textContent =
+          `onmouseenter → kata: "${el.textContent}"`;
+      });
+      el.addEventListener('mouseleave', () => {
+        document.getElementById('hover-msg').textContent = '';
+      });
+    });
+
+    /* ── Form Submit ── */
+    function handleSubmit(e) {
+      e.preventDefault();
+      const msg = document.getElementById('form-msg');
+      msg.style.display = 'block';
+      setTimeout(() => { msg.style.display = 'none'; }, 4000);
+    }
+
+    /* ── Scroll Reveal ── */
+    const revealObs = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          revealObs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.08 });
+
+    document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+  </script>
+</body>
+</html>

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Arc III — Pewaris Kristal | The Secret of Crystal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--void:#04050d;--card:#0f0c18;--border:#1a1530;--crystal:#a78bfa;--crystal2:#7c3aed;--gold:#f5c842;--gold2:#d4a017;--ember:#ff6b35;--danger:#f43f5e;--ice:#93c5fd;--text:#e8e0f8;--muted:#6b5d94;--soft:rgba(232,224,248,.75);}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{background:var(--void);color:var(--text);font-family:'EB Garamond',Georgia,serif;min-height:100vh;overflow-x:hidden;cursor:none;}
+    #cur-dot{width:6px;height:6px;background:var(--crystal);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9999;box-shadow:0 0 12px var(--crystal),0 0 24px var(--crystal2);}
+    #cur-ring{width:26px;height:26px;border:1px solid var(--crystal);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9998;opacity:.45;}
+    #starfield{position:fixed;inset:0;z-index:0;pointer-events:none;}
+    .ambient{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 55% 55% at 50% 40%,rgba(124,58,237,.12) 0%,transparent 70%),radial-gradient(ellipse 30% 40% at 80% 70%,rgba(147,197,253,.05) 0%,transparent 60%);}
+    nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:60px;background:rgba(4,3,8,.88);backdrop-filter:blur(18px);border-bottom:1px solid rgba(124,58,237,.14);}
+    .nav-left{display:flex;align-items:center;gap:16px;}
+    .nav-back{font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.15em;color:var(--muted);text-decoration:none;text-transform:uppercase;display:flex;align-items:center;gap:6px;transition:color .2s;}
+    .nav-back:hover{color:var(--crystal);}
+    .nav-sep{width:1px;height:18px;background:var(--border);}
+    .nav-arc{font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.18em;color:var(--crystal);text-transform:uppercase;}
+    .nav-progress{display:flex;align-items:center;gap:8px;}
+    .prog-dot{width:8px;height:8px;border-radius:50%;border:1px solid var(--border);transition:all .3s;position:relative;}
+    .prog-dot a{display:block;width:100%;height:100%;border-radius:50%;}
+    .prog-dot.active{background:var(--crystal);border-color:var(--crystal);box-shadow:0 0 8px var(--crystal);}
+    .prog-dot.done{background:var(--gold2);border-color:var(--gold);}
+    .page{position:relative;z-index:2;max-width:780px;margin:0 auto;padding:110px 24px 120px;}
+    .chapter-header{text-align:center;margin-bottom:64px;opacity:0;animation:rise .9s .1s ease forwards;}
+    .ch-arc{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.35em;color:var(--gold);text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:18px;}
+    .ch-line{width:50px;height:1px;}
+    .ch-line.l{background:linear-gradient(90deg,transparent,var(--gold));}
+    .ch-line.r{background:linear-gradient(90deg,var(--gold),transparent);}
+    .chapter-num{font-family:'Cinzel Decorative',serif;font-size:clamp(2.5rem,6vw,4.5rem);font-weight:900;background:linear-gradient(135deg,#fff 0%,var(--crystal) 40%,var(--gold) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;margin-bottom:16px;filter:drop-shadow(0 0 30px rgba(167,139,250,.5));}
+    .chapter-title{font-family:'Cinzel Decorative',serif;font-size:clamp(1rem,3vw,1.5rem);color:#fff;letter-spacing:.06em;margin-bottom:10px;}
+    .chapter-subtitle{font-family:'Cinzel',serif;font-size:.75rem;letter-spacing:.2em;color:var(--crystal);text-transform:uppercase;margin-bottom:24px;}
+    .ch-divider{width:200px;height:1px;margin:0 auto;background:linear-gradient(90deg,transparent,var(--crystal),var(--gold),var(--crystal),transparent);}
+    .story{opacity:0;animation:rise .9s .4s ease forwards;}
+    .opening-quote{border-left:2px solid var(--crystal2);padding:20px 0 20px 28px;margin-bottom:48px;position:relative;}
+    .opening-quote::before{content:'"';position:absolute;left:-2px;top:-10px;font-family:'Cinzel Decorative',serif;font-size:3rem;color:rgba(167,139,250,.2);line-height:1;}
+    .opening-quote p{font-size:clamp(1rem,2.5vw,1.2rem);font-style:italic;color:rgba(232,224,248,.85);line-height:1.9;}
+    .opening-quote cite{display:block;margin-top:12px;font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.2em;color:var(--crystal);text-transform:uppercase;}
+    .prose p{font-size:clamp(1rem,2vw,1.15rem);line-height:1.95;color:var(--soft);margin-bottom:28px;text-align:justify;hyphens:auto;}
+    .prose p:first-child::first-letter{font-family:'Cinzel Decorative',serif;font-size:3.8rem;font-weight:900;float:left;line-height:.8;margin:4px 12px 0 0;color:var(--crystal);text-shadow:0 0 20px rgba(167,139,250,.6);}
+    .prose em{color:var(--gold);font-style:italic;}
+    .prose strong{color:#fff;font-weight:600;}
+    .story-break{display:flex;align-items:center;justify-content:center;gap:12px;margin:48px 0;font-size:.75rem;color:var(--muted);}
+    .story-break::before,.story-break::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);}
+    .lore-box{border-radius:4px;padding:20px 24px;margin:32px 0;}
+    .lore-box.crystal{background:rgba(124,58,237,.06);border:1px solid rgba(167,139,250,.18);border-left:3px solid var(--crystal);}
+    .lore-box.gold{background:rgba(245,200,66,.04);border:1px solid rgba(245,200,66,.16);border-left:3px solid var(--gold2);}
+    .lore-box.ice{background:rgba(147,197,253,.04);border:1px solid rgba(147,197,253,.15);border-left:3px solid var(--ice);}
+    .lore-box .lore-label{font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;margin-bottom:10px;}
+    .lore-box.crystal .lore-label{color:var(--crystal);}
+    .lore-box.gold .lore-label{color:var(--gold);}
+    .lore-box.ice .lore-label{color:var(--ice);}
+    .lore-box p{font-size:.95rem;font-style:italic;color:rgba(232,224,248,.65);line-height:1.8;margin:0;}
+    /* Crystal awakening moment */
+    .crystal-moment{margin:36px 0;padding:32px;background:linear-gradient(135deg,rgba(124,58,237,.1),rgba(255,255,255,.03));border:1px solid rgba(167,139,250,.22);border-radius:6px;text-align:center;position:relative;overflow:hidden;}
+    .crystal-moment::before{content:'💎';position:absolute;font-size:7rem;opacity:.05;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;}
+    .crystal-moment p{font-family:'EB Garamond',serif;font-size:1.05rem;font-style:italic;color:rgba(232,224,248,.82);line-height:1.9;position:relative;z-index:1;}
+    /* Ibza freed */
+    .freed-visual{margin:36px 0;padding:28px;background:rgba(0,0,0,.3);border:1px solid rgba(167,139,250,.14);border-radius:5px;display:flex;gap:20px;align-items:center;}
+    @media(max-width:500px){.freed-visual{flex-direction:column;text-align:center;}}
+    .freed-icon{font-size:3.5rem;flex-shrink:0;filter:drop-shadow(0 0 16px rgba(167,139,250,.6));animation:pulse 2.5s ease-in-out infinite;}
+    @keyframes pulse{0%,100%{filter:drop-shadow(0 0 16px rgba(167,139,250,.5))}50%{filter:drop-shadow(0 0 30px rgba(167,139,250,.9));}}
+    .freed-text p{font-size:.95rem;font-style:italic;color:rgba(232,224,248,.65);line-height:1.75;}
+    .freed-text strong{color:var(--crystal);font-style:normal;}
+    /* Dialogue */
+    .dialogue{margin:28px 0;}
+    .dialogue-line{display:flex;flex-direction:column;gap:4px;margin-bottom:16px;padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:4px;}
+    .dialogue-line.ibza{border-left:3px solid var(--gold);}
+    .dialogue-line.rez{border-left:3px solid var(--crystal);}
+    .dialogue-line.hylios{border-left:3px solid var(--ember);}
+    .dialogue-line.crystal-voice{border-left:3px solid rgba(255,255,255,.4);}
+    .dialogue-speaker{font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;margin-bottom:5px;}
+    .dialogue-line.ibza .dialogue-speaker{color:var(--gold);}
+    .dialogue-line.rez .dialogue-speaker{color:var(--crystal);}
+    .dialogue-line.hylios .dialogue-speaker{color:var(--ember);}
+    .dialogue-line.crystal-voice .dialogue-speaker{color:rgba(255,255,255,.5);}
+    .dialogue-text{font-size:1rem;font-style:italic;color:rgba(232,224,248,.82);line-height:1.7;}
+    /* Training steps */
+    .training-steps{display:flex;flex-direction:column;gap:12px;margin:28px 0;}
+    .t-step{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:16px 20px;display:flex;gap:16px;align-items:flex-start;}
+    .t-num{font-family:'Cinzel',serif;font-size:.65rem;color:var(--crystal);min-width:32px;padding-top:3px;}
+    .t-text{font-size:.94rem;font-style:italic;color:var(--muted);line-height:1.7;}
+    .nav-footer{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(4,3,8,.94);backdrop-filter:blur(16px);border-top:1px solid rgba(124,58,237,.12);display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:64px;}
+    .nav-btn{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--border);padding:9px 22px;border-radius:3px;display:flex;align-items:center;gap:8px;transition:all .25s;}
+    .nav-btn:hover{color:var(--crystal);border-color:var(--crystal);background:rgba(167,139,250,.05);}
+    .nav-btn.primary{color:var(--gold);border-color:var(--gold2);}
+    .nav-btn.primary:hover{background:rgba(245,200,66,.07);border-color:var(--gold);}
+    .nav-page-info{font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;}
+    .nav-page-info span{color:var(--crystal);}
+    @keyframes rise{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  </style>
+</head>
+<body>
+  <div id="cur-dot"></div><div id="cur-ring"></div>
+  <canvas id="starfield"></canvas>
+  <div class="ambient"></div>
+  <nav>
+    <div class="nav-left">
+      <a href="../story-hub.html" class="nav-back"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Story Hub</a>
+      <div class="nav-sep"></div>
+      <span class="nav-arc">Arc III · Dark Zen</span>
+    </div>
+    <div class="nav-progress">
+      <div class="prog-dot done"><a href="arc3-p1.html"></a></div>
+      <div class="prog-dot done"><a href="arc3-p2.html"></a></div>
+      <div class="prog-dot done"><a href="arc3-p3.html"></a></div>
+      <div class="prog-dot active"></div>
+      <div class="prog-dot"><a href="arc3-p5.html"></a></div>
+    </div>
+  </nav>
+
+  <main class="page">
+    <header class="chapter-header">
+      <div class="ch-arc"><span class="ch-line l"></span>Arc III · Dark Zen<span class="ch-line r"></span></div>
+      <div class="chapter-num">Bagian IV</div>
+      <h1 class="chapter-title">Pewaris Kristal</h1>
+      <div class="chapter-subtitle">Rez Selamat · Ibza Bebas · Warisan Berpindah</div>
+      <div class="ch-divider"></div>
+    </header>
+
+    <article class="story">
+
+      <div class="opening-quote">
+        <p>Di antara puing-puing istana yang masih berasap, Rez membuka matanya — dikelilingi cahaya putih pekat yang memeluknya seperti pelukan seorang ibu yang tidak ingin melepaskan anaknya.</p>
+        <cite>— Arc III · Dark Zen</cite>
+      </div>
+
+      <div class="prose">
+        <p>
+          Rez terbaring di antara reruntuhan. Sekujur tubuhnya sakit — namun ia hidup. Cahaya putih pekat masih mengambang di sekitarnya seperti kain sutra yang bergerak pelan. Perlahan-lahan, Rez bangkit dan menyadari sesuatu: ia tidak terluka sama sekali. Tidak satu pun serpihan batu, logam, atau puing yang menyentuh kulitnya. <em>Sesuatu telah melindunginya.</em>
+        </p>
+        <p>
+          Dari kejauhan, Hylios yang memantau melalui koneksi lensa menutup matanya sejenak — ia melihat apa yang tidak bisa dilihat siapapun. Cahaya yang memeluk Rez itu bukan hanya Pure Crystal. Ada seseorang di dalamnya. Dan seseorang itu sangat familiar.
+        </p>
+      </div>
+
+      <div class="story-break">✦ ✦ ✦</div>
+
+      <!-- IBZA BEBAS -->
+      <div class="prose">
+        <p>
+          Di halaman istana yang hancur — patung batu raksasa di depan gerbang bergetar. Retakan halus muncul di permukaannya, meluas satu per satu dari kaki hingga ke ujung jari yang terentang. Tentakel-tentakel batu yang melilit tubuhnya mengeras lalu retak seperti kayu tua yang terlalu lama dibiarkan kering. Suara derak keras terdengar di seluruh penjuru istana yang masih membara.
+        </p>
+        <p>
+          Lalu — dalam sekejap — seluruh batu itu meledak menjadi serpihan halus yang beterbangan seperti debu bercahaya. Dan dari dalam cahaya yang membanjir itu, sesosok tubuh jatuh berlutut ke tanah dengan napas yang dalam dan berat.
+        </p>
+      </div>
+
+      <div class="freed-visual">
+        <div class="freed-icon">🧍</div>
+        <div class="freed-text">
+          <p><strong>Ibza</strong> — setelah lebih dari 10.000 tahun tersegel dalam batu — akhirnya bebas. Tubuhnya yang kini berdiri tegak masih memancarkan sisa-sisa cahaya kristal dari sela-sela jarinya. Ia mendongak ke langit Fearth yang masih merah membara akibat ledakan — dan untuk pertama kalinya dalam ribuan tahun, ia menghirup udara secara bebas.</p>
+        </div>
+      </div>
+
+      <div class="prose">
+        <p>
+          Ibza berdiri tegak, memandangi istana yang sudah separuh hancur. Banyak yang berubah. Banyak yang sudah tidak ia kenali. Namun satu hal yang tidak berubah: energi kristal yang mengalir di dalam darahnya masih terasa sama seperti saat pertama kali Pure Crystal menyentuhnya ribuan tahun lalu.
+        </p>
+        <p>
+          Ia berjalan perlahan di antara reruntuhan — melewati tubuh-tubuh prajurit yang terkapar, melewati tembok yang terburai, melewati aroma terbakar yang menyelimuti udara. Hingga akhirnya ia melihatnya: <em>seorang anak kecil berdiri di tengah puing-puing, dikelilingi cahaya putih yang sama persis dengan miliknya dulu.</em>
+        </p>
+      </div>
+
+      <div class="dialogue">
+        <div class="dialogue-line ibza">
+          <div class="dialogue-speaker">Ibza</div>
+          <div class="dialogue-text">"Kau... siapa namamu, anak?"</div>
+        </div>
+        <div class="dialogue-line rez">
+          <div class="dialogue-speaker">Rez — mengangkat wajah</div>
+          <div class="dialogue-text">"Rez. Namaku Rez."</div>
+        </div>
+        <div class="dialogue-line ibza">
+          <div class="dialogue-speaker">Ibza — terdiam lama</div>
+          <div class="dialogue-text">"Kau keturunannya... keturunan adikku. Aku bisa merasakannya dari cahaya yang ada di sekelilingmu."</div>
+        </div>
+        <div class="dialogue-line rez">
+          <div class="dialogue-speaker">Rez</div>
+          <div class="dialogue-text">"Kau... apakah kau Ibza? Yang ada di alkitab itu?"</div>
+        </div>
+        <div class="dialogue-line ibza">
+          <div class="dialogue-speaker">Ibza — tersenyum tipis</div>
+          <div class="dialogue-text">"Versi yang berbeda dari apa yang tertulis dalam kitab itu. Tapi ya — aku adalah Ibza."</div>
+        </div>
+      </div>
+
+      <div class="story-break">✦ ✦ ✦</div>
+
+      <!-- WARISAN BERPINDAH -->
+      <div class="crystal-moment">
+        <p>
+          Pure Crystal melayang di antara mereka berdua — berputar pelan, memancarkan cahaya yang tidak menyilaukan namun sangat dalam. Ia bergerak mendekati Rez terlebih dahulu, menyentuh dadanya sejenak — seolah memeriksa. Lalu bergerak kembali ke arah Ibza. Ibza mengangkat tangannya, membiarkan kristal itu melayang di atas telapaknya. Beberapa detik berlalu dalam senyap.<br/><br/>
+          Kemudian — Pure Crystal bergerak lagi. Kali ini ke arah Rez. Dan tidak kembali.
+        </p>
+      </div>
+
+      <div class="dialogue">
+        <div class="dialogue-line crystal-voice">
+          <div class="dialogue-speaker">Pure Crystal — suara tanpa asal</div>
+          <div class="dialogue-text">"Kau adalah pemilikku yang baru."</div>
+        </div>
+        <div class="dialogue-line rez">
+          <div class="dialogue-speaker">Rez — dengan mata berkaca-kaca</div>
+          <div class="dialogue-text">"Tapi... aku masih sembilan tahun. Aku tidak tahu apa-apa."</div>
+        </div>
+        <div class="dialogue-line crystal-voice">
+          <div class="dialogue-speaker">Pure Crystal</div>
+          <div class="dialogue-text">"Itu justru alasanku memilihmu. Kau belum penuh dengan keputusan yang salah."</div>
+        </div>
+      </div>
+
+      <div class="lore-box crystal">
+        <div class="lore-label">💎 Pewarisan Pure Crystal</div>
+        <p>Ibza tidak merasa kehilangan. Justru sebaliknya — ia merasakan sesuatu yang melegakan, seperti beban berat yang selama ribuan tahun ia pikul akhirnya berpindah ke tangan yang seharusnya. Pure Crystal tidak pernah memiliki pemilik tetap. Ia memilih. Dan kali ini — ia memilih Rez bukan karena kekuatan, melainkan karena kepolosan dan keinginan yang murni tanpa ambisi kekuasaan.</p>
+      </div>
+
+      <div class="story-break">✦ ✦ ✦</div>
+
+      <!-- LATIHAN -->
+      <div class="prose">
+        <p>
+          Ibza, Hylios, dan kelompok dari Benua Yang berkumpul di satu tempat. Waktu tidak berpihak pada mereka — Raja X pasti sudah menyadari bahwa patung itu hancur, dan ia pasti sudah menyiapkan sesuatu. Mereka memiliki waktu yang sangat terbatas.
+        </p>
+        <p>
+          Ibza mengambil alih pelatihan Rez secara langsung. Setiap hari, dari pagi hingga malam, ia mengajarkan Rez cara mengenal kristal yang kini bersemayam di dalam tubuhnya — bukan cara menggunakannya sebagai senjata, melainkan cara <em>mendengarkannya</em>.
+        </p>
+      </div>
+
+      <div class="training-steps">
+        <div class="t-step">
+          <div class="t-num">Hari 01</div>
+          <div class="t-text">Ibza meminta Rez hanya duduk diam dan merasakan detak kristal di dadanya. Rez yang gelisah tidak bisa diam selama lebih dari tiga menit. Ibza tidak memarahi — ia hanya duduk bersamanya sampai Rez tertidur.</div>
+        </div>
+        <div class="t-step">
+          <div class="t-num">Hari 03</div>
+          <div class="t-text">Kristal mulai merespons emosi Rez — saat ia sedih, cahaya di telapak tangannya berubah biru. Saat ia marah, merah. Saat tenang, putih. Ibza menjelaskan bahwa warna adalah bahasa pertama kristal.</div>
+        </div>
+        <div class="t-step">
+          <div class="t-num">Hari 07</div>
+          <div class="t-text">Rez berhasil membentuk perisai kecil dari cahaya kristal untuk pertama kalinya. Perisai itu tidak berbentuk sempurna — lebih mirip gelembung sabun raksasa — tapi ia berhasil menahan lemparan batu dari Hylios tanpa terluka.</div>
+        </div>
+        <div class="t-step">
+          <div class="t-num">Hari 14</div>
+          <div class="t-text">Rez bisa berbicara dengan Pure Crystal secara langsung. Bukan dengan suara — melainkan dengan perasaan. Saat Rez menyentuh tanah, kristal memberitahunya di mana letak setiap makhluk hidup dalam radius seratus meter.</div>
+        </div>
+      </div>
+
+      <div class="lore-box gold">
+        <div class="lore-label">⚔ Ibza Setelah Ribuan Tahun</div>
+        <p>Kekuatan Ibza sendiri sudah jauh melampaui batas manusia biasa — sepuluh ribu tahun tersegel dalam batu justru membuatnya menyerap energi bumi Fearth secara pasif. Tubuhnya kini berfungsi seperti baterai kosmik yang hampir penuh. Namun ia memilih untuk tidak menunjukkan itu kepada siapapun kecuali Rez — dan hanya menggunakannya saat benar-benar diperlukan.</p>
+      </div>
+
+      <div class="story-break">✦ ✦ ✦</div>
+
+      <div class="prose">
+        <p>
+          Dua minggu berlalu. Rez tumbuh dengan cepat — bukan hanya dalam kemampuannya mengendalikan kristal, namun juga dalam cara ia memandang dunia. Ia melihat Fearth bukan sebagai tempat yang gelap dan menakutkan, melainkan sebagai tempat yang sedang sakit dan butuh disembuhkan.
+        </p>
+        <p>
+          Suatu malam, saat Rez sedang berlatih sendirian di tepi tebing yang menghadap lautan luas Fearth — sebuah cahaya hitam melintas di langit. Sangat cepat. Seperti kilat. Namun berbeda dari kilat biasa — cahaya itu bergerak <em>terlalu sadar</em>. Terlalu terarah. Dan di mana ia lewat, langit seketika berubah menjadi hitam pekat seperti tinta yang ditumpahkan ke dalam air jernih.
+        </p>
+      </div>
+
+      <div class="lore-box ice">
+        <div class="lore-label">🌑 Tanda Pertama</div>
+        <p>Ibza yang berdiri di balik Rez melihatnya juga. Ia langsung mengenalinya — bukan dari ingatan visual, melainkan dari perasaan yang menjalar dingin ke seluruh tubuhnya, seperti saat seseorang mendengar nama yang sudah lama tidak disebut. Ia menutup matanya sejenak. Lalu membukanya kembali dengan ekspresi yang sulit dibaca — antara khawatir dan pasrah. Karena ia tahu: <strong>yang baru saja lewat itu adalah bagian dari dirinya sendiri yang dulu dipisahkan paksa.</strong></p>
+      </div>
+
+      <div class="dialogue">
+        <div class="dialogue-line rez">
+          <div class="dialogue-speaker">Rez</div>
+          <div class="dialogue-text">"Ibza... itu apa?"</div>
+        </div>
+        <div class="dialogue-line ibza">
+          <div class="dialogue-speaker">Ibza — dengan suara yang sangat pelan</div>
+          <div class="dialogue-text">"Itu... adalah alasan mengapa namanya disebut Arc ini."</div>
+        </div>
+        <div class="dialogue-line rez">
+          <div class="dialogue-speaker">Rez</div>
+          <div class="dialogue-text">"Dark Zen?"</div>
+        </div>
+        <div class="dialogue-line ibza">
+          <div class="dialogue-speaker">Ibza</div>
+          <div class="dialogue-text">"Ya. Ia sudah tiba."</div>
+        </div>
+      </div>
+
+    </article>
+  </main>
+
+  <div class="nav-footer">
+    <a href="arc3-p3.html" class="nav-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Kembali</a>
+    <div class="nav-page-info">Halaman <span>4</span> / 5</div>
+    <a href="arc3-p5.html" class="nav-btn primary">Lanjut<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+  </div>
+
+  <script>
+    const dot=document.getElementById('cur-dot'),ring=document.getElementById('cur-ring');
+    let mx=0,my=0,rx=0,ry=0;
+    document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;dot.style.left=mx-3+'px';dot.style.top=my-3+'px';});
+    (function loop(){rx+=(mx-rx-13)*.1;ry+=(my-ry-13)*.1;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(loop);})();
+    const cv=document.getElementById('starfield'),cx=cv.getContext('2d');
+    let W,H,stars=[];
+    function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight;}
+    function initS(){stars=Array.from({length:210},()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.2+.2,a:Math.random(),sp:Math.random()*.2+.03,tw:Math.random()*Math.PI*2,purple:Math.random()<.15,gold:Math.random()<.06}));}
+    function draw(){cx.clearRect(0,0,W,H);const t=Date.now()*.001;stars.forEach(s=>{const a=s.a*(.4+.6*Math.sin(t*s.sp+s.tw));cx.beginPath();cx.arc(s.x,s.y,s.r,0,Math.PI*2);cx.fillStyle=s.gold?`rgba(245,200,66,${a*.7})`:s.purple?`rgba(167,139,250,${a*.85})`:`rgba(232,224,248,${a*.55})`;cx.fill();});requestAnimationFrame(draw);}
+    resize();initS();draw();
+    window.addEventListener('resize',()=>{resize();initS();});
+  </script>
+</body>
+</html>

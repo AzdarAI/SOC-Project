@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Secret Of Crystal</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial;
+    background: linear-gradient(135deg, #020617, #0f172a);
+    color: white;
+    text-align: center;
+}
+
+h1 {
+    color: gold;
+    margin-top: 20px;
+}
+
+/* sembunyikan radio */
+input[type="radio"] {
+    display: none;
+}
+
+.menu label {
+    display: inline-block;
+    margin: 10px;
+    padding: 12px 25px;
+    background: gold;
+    color: black;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.menu label:hover {
+    background: orange;
+    transform: scale(1.1);
+}
+
+/* konten */
+.content {
+    margin: 20px auto;
+    width: 80%;
+    padding: 20px;
+    background: #1e293b;
+    border-radius: 20px;
+    min-height: 300px;
+
+    opacity: 0;
+    transform: translateY(20px);
+    transition: 0.5s;
+    display: none;
+}
+
+/* tampilkan berdasarkan pilihan */
+#arc1:checked ~ #content1,
+#arc2:checked ~ #content2,
+#arc3:checked ~ #content3 {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>The Secret Of Crystal</h1>
+<p>Pilih takdirmu, pilih arc yang ingin kau buka...</p>
+
+<div class="menu">
+    <label for="arc1"> <a href="arc1.html"> Arc 1</a></label>
+    <label for="arc2">Arc 2</label>
+    <label for="arc3">Arc 3</label>
+</div>
+
+<!-- radio -->
+
+<input type="radio" name="arc" id="arc1">
+<input type="radio" name="arc" id="arc2">
+<input type="radio" name="arc" id="arc3">
+
+<!-- konten -->
+
+<div id="content1" class="content">
+    <h2>Arc 1</h2>
+    <p>Awal dari segalanya dimulai dari Crystal pertama...</p>
+</div>
+
+<div id="content2" class="content">
+    <h2>Arc 2</h2>
+    <p>Dimensi mulai retak, dan Astral Clan mulai bergerak...</p>
+</div>
+
+<div id="content3" class="content">
+    <h2>Arc 3</h2>
+    <p>Kebenaran mulai terungkap... dan dunia tidak lagi sama.</p>
+</div>
+
+</body>
+</html>
